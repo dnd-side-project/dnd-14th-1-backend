@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:15.3
+    container_name: dnd-14
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: dnd_14
