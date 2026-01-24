@@ -9,5 +9,4 @@ public class Dnd14th1BackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(Dnd14th1BackendApplication.class, args);
     }
-
 }
