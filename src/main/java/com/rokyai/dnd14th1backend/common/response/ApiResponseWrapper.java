@@ -19,7 +19,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RestControllerAdvice(basePackages = "com.rokyai.dnd14th1backend")
 public class ApiResponseWrapper implements ResponseBodyAdvice<Object> {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    /** Spring이 자동 구성한 ObjectMapper 빈을 주입받아 설정 일관성 유지 */
+    public ApiResponseWrapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public boolean supports(
@@ -71,8 +76,8 @@ public class ApiResponseWrapper implements ResponseBodyAdvice<Object> {
     }
 
     private boolean isSwaggerPath(String path) {
-        return path.contains("/swagger-ui")
-                || path.contains("/v3/api-docs")
-                || path.contains("/swagger-resources");
+        return path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/swagger-resources");
     }
 }

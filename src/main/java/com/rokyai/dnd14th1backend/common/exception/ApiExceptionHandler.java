@@ -22,7 +22,11 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiExceptionResponse<String>> handleApiException(ApiException ex) {
-        log.warn("API 예외 발생 [Status] : {}, [Detail] : {}\n[StackTrace] : \n{}", ex.getStatus(), ex.getDetail(), ex.getStackTrace());
+        log.warn(
+                "API 예외 발생 [Status] : {}, [Detail] : {}\n[StackTrace] : \n{}",
+                ex.getStatus(),
+                ex.getDetail(),
+                ex.getStackTrace());
         ApiExceptionResponse<String> response =
                 new ApiExceptionResponse<>(ex.getStatus(), null, ex.getDetail());
         return ResponseEntity.status(ex.getStatus().getHttpStatusCode()).body(response);
@@ -65,7 +69,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiExceptionResponse<String> handleAllExceptions(Exception ex) {
-        log.error("예외 발생: [Type] : {}, [Message] : {}\n[StackTrace] : \n{}", ex.getClass().getName(), ex.getMessage(), ex.getStackTrace());
+        log.error(
+                "예외 발생: [Type] : {}, [Message] : {}\n[StackTrace] : \n{}",
+                ex.getClass().getName(),
+                ex.getMessage(),
+                ex.getStackTrace());
         return ApiExceptionResponse.error(DefaultStatus.UNKNOWN_ERROR);
     }
 }
