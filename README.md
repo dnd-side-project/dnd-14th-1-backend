@@ -148,11 +148,11 @@ public ResponseEntity<Resource> downloadFile() { ... }
 
 | 상태 | HTTP | customStatusCode | 설명 |
 |-----|------|------------------|------|
-| OK | 200 | 0 | 성공 |
-| BAD_REQUEST | 400 | 1 | 잘못된 요청 |
-| UNAUTHORIZED | 401 | 2 | 인증 필요 |
-| FORBIDDEN | 403 | 3 | 접근 권한 없음 |
-| NOT_FOUND | 404 | 4 | 리소스 없음 |
-| CONFLICT | 409 | 5 | 리소스 충돌 |
-| INTERNAL_SERVER_ERROR | 500 | 90 | 서버 내부 오류 |
-| UNKNOWN_ERROR | 500 | 99 | 알 수 없는 오류 |
+| OK | 200 | 20               | 성공 |
+| BAD_REQUEST | 400 | 400              | 잘못된 요청 |
+| UNAUTHORIZED | 401 | 401              | 인증 필요 |
+| FORBIDDEN | 403 | 403              | 접근 권한 없음 |
+| NOT_FOUND | 404 | 404              | 리소스 없음 |
+| CONFLICT | 409 | 409              | 리소스 충돌 |
+| INTERNAL_SERVER_ERROR | 500 | 500              | 서버 내부 오류 |
+| UNKNOWN_ERROR | 500 | 500              | 알 수 없는 오류 |
