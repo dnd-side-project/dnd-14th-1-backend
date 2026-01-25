@@ -9,23 +9,23 @@ import com.rokyai.dnd14th1backend.common.response.StatusInterface;
 public class ApiException extends RuntimeException {
 
     private final StatusInterface status;
-    private final String detail;
 
     public ApiException(StatusInterface status) {
         super(status.getDescription());
         this.status = status;
-        this.detail = status.getDescription();
     }
 
     public ApiException(StatusInterface status, String detail) {
         super(detail);
         this.status = status;
-        this.detail = detail;
     }
 
     public ApiException(StatusInterface status, String detail, Throwable cause) {
         super(detail, cause);
         this.status = status;
-        this.detail = detail;
+    }
+
+    public String getDetail() {
+        return super.getMessage();
     }
 }
