@@ -27,8 +27,8 @@ dependencies {
     // swaggeEAD
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
 
-    // sentry
-    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.5.0'
+    // sentry (logback 통합 - Spring Boot 4 호환)
+    implementation 'io.sentry:sentry-logback:8.5.0'
 
     runtimeOnly 'org.postgresql:postgresql'
     compileOnly 'org.projectlombok:lombok'
