@@ -10,3 +10,9 @@ spring:
 springdoc:
     api-docs:
         version: "OPENAPI_3_0"
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
