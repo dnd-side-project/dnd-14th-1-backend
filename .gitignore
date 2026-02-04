@@ -35,5 +35,13 @@ out/
 
 ### VS Code ###
 .vscode/
-.env
 **/conf/ssl/
+.agent
+.claude
+.gemini
+.github/prompts
+.claude/
+.gemini/
+
+### environments ###
+.env
