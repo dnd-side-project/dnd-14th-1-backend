@@ -3,6 +3,9 @@ package com.rokyai.dnd14th1backend.users.domain;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -57,9 +60,11 @@ public class UserIdentity {
     @Column(nullable = false)
     private String packageName;
 
-    @Column(nullable = false)
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
@@ -81,7 +86,6 @@ public class UserIdentity {
             Platform platform,
             String deviceId,
             String packageName) {
-        LocalDateTime now = LocalDateTime.now();
         return UserIdentity.builder()
                 .user(user)
                 .signinType(signinType)
@@ -89,8 +93,6 @@ public class UserIdentity {
                 .platform(platform)
                 .deviceId(deviceId)
                 .packageName(packageName)
-                .createdAt(now)
-                .updatedAt(now)
                 .build();
     }
 
@@ -103,6 +105,5 @@ public class UserIdentity {
     public void updateDeviceInfo(String deviceId, String packageName) {
         this.deviceId = deviceId;
         this.packageName = packageName;
-        this.updatedAt = LocalDateTime.now();
     }
 }

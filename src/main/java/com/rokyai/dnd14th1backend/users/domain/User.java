@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,12 +36,14 @@ public class User {
     @Column(columnDefinition = "UUID")
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String email;
 
-    @Column(nullable = false)
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
@@ -53,7 +58,6 @@ public class User {
      * @return 생성된 User
      */
     public static User create(String email) {
-        LocalDateTime now = LocalDateTime.now();
-        return User.builder().email(email).createdAt(now).updatedAt(now).build();
+        return User.builder().email(email).build();
     }
 }
