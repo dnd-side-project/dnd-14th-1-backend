@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
 /** JWT 토큰 생성 및 검증을 담당합니다. */
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
@@ -82,6 +84,7 @@ public class JwtTokenProvider {
             parseToken(token);
             return true;
         } catch (Exception exception) {
+            log.warn("JWT 토큰 검증 실패: {}", exception.getMessage());
             return false;
         }
     }

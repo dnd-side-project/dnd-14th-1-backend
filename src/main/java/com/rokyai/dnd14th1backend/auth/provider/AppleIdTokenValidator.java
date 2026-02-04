@@ -43,8 +43,6 @@ public class AppleIdTokenValidator {
             // Apple 공개키로 서명 검증 (원본 토큰 문자열 사용)
             verifySignature(idToken, decodedJWT);
             verifyClaims(decodedJWT);
-        } catch (InvalidIdTokenException exception) {
-            throw exception;
         } catch (JWTVerificationException exception) {
             throw new InvalidIdTokenException("ID Token 서명 검증 실패", exception);
         } catch (Exception exception) {
@@ -63,17 +61,15 @@ public class AppleIdTokenValidator {
         try {
             String keyId = decodedJWT.getKeyId();
             if (keyId == null) {
-                throw new InvalidIdTokenException(AuthStatus.INVALID_ID_TOKEN, "ID Token 헤더에 kid(Key ID)가 없습니다");
+                throw new InvalidIdTokenException(
+                        AuthStatus.INVALID_ID_TOKEN, "ID Token 헤더에 kid(Key ID)가 없습니다");
             }
 
             PublicKey publicKey = appleJwksProvider.getPublicKey(keyId);
             Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) publicKey, null);
 
             // 원본 토큰 문자열로 검증 (DecodedJWT가 아닌)
-            JWT.require(algorithm)
-                    .withIssuer("https://appleid.apple.com")
-                    .build()
-                    .verify(idToken);
+            JWT.require(algorithm).withIssuer("https://appleid.apple.com").build().verify(idToken);
         } catch (InvalidIdTokenException exception) {
             throw exception;
         } catch (SignatureVerificationException exception) {
@@ -84,7 +80,10 @@ public class AppleIdTokenValidator {
         } catch (Exception exception) {
             throw new InvalidIdTokenException(
                     AuthStatus.INVALID_ID_TOKEN,
-                    "서명 검증 중 오류 발생: " + exception.getClass().getSimpleName() + " - " + exception.getMessage(),
+                    "서명 검증 중 오류 발생: "
+                            + exception.getClass().getSimpleName()
+                            + " - "
+                            + exception.getMessage(),
                     exception);
         }
     }
@@ -101,14 +100,16 @@ public class AppleIdTokenValidator {
         // sub 클레임 검증: subject(사용자 ID)가 존재해야 함
         String subject = decodedJWT.getSubject();
         if (subject == null || subject.isEmpty()) {
-            throw new InvalidIdTokenException(AuthStatus.INVALID_ID_TOKEN, "ID Token에 sub(subject) 클레임이 없습니다");
+            throw new InvalidIdTokenException(
+                    AuthStatus.INVALID_ID_TOKEN, "ID Token에 sub(subject) 클레임이 없습니다");
         }
 
         // aud 클레임 검증: audience는 app의 Bundle ID 또는 등록된 client_id여야 함
         String audience =
                 decodedJWT.getAudience().isEmpty() ? null : decodedJWT.getAudience().get(0);
         if (audience == null) {
-            throw new InvalidIdTokenException(AuthStatus.INVALID_ID_TOKEN, "ID Token에 aud(audience) 클레임이 없습니다");
+            throw new InvalidIdTokenException(
+                    AuthStatus.INVALID_ID_TOKEN, "ID Token에 aud(audience) 클레임이 없습니다");
         }
 
         // audience가 등록된 client_id와 일치하는지 검증

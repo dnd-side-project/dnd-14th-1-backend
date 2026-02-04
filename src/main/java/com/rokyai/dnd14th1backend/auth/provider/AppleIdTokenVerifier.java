@@ -4,7 +4,6 @@ import java.util.Base64;
 
 import org.springframework.stereotype.Component;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.rokyai.dnd14th1backend.auth.dto.AppleIdTokenPayload;

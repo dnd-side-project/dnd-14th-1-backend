@@ -18,13 +18,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.extern.slf4j.Slf4j;
+
 import com.rokyai.dnd14th1backend.auth.exception.AuthStatus;
 import com.rokyai.dnd14th1backend.auth.exception.InvalidIdTokenException;
 
 /**
- * Apple의 JWKS(JSON Web Key Set)를 관리하고 공개 키를 제공합니다. WebClient를 사용하여 Apple의 JWKS 엔드포인트에서 공개 키를
- * 다운로드하고 캐싱합니다.
+ * Apple의 JWKS(JSON Web Key Set)를 관리하고 공개 키를 제공합니다. WebClient를 사용하여 Apple의 JWKS 엔드포인트에서 공개 키를 다운로드하고
+ * 캐싱합니다.
  */
+@Slf4j
 @Component
 public class AppleJwksProvider {
 
@@ -37,10 +40,11 @@ public class AppleJwksProvider {
     private static final long CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24시간
 
     public AppleJwksProvider() {
-        this.webClient = WebClient.builder()
-                .defaultHeader(HttpHeaders.USER_AGENT, "DndBackend/1.0")
-                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                .build();
+        this.webClient =
+                WebClient.builder()
+                        .defaultHeader(HttpHeaders.USER_AGENT, "DndBackend/1.0")
+                        .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                        .build();
     }
 
     /**
@@ -79,11 +83,13 @@ public class AppleJwksProvider {
         }
 
         try {
-            JwksResponse jwksResponse = webClient.get()
-                    .uri(APPLE_JWKS_URL)
-                    .retrieve()
-                    .bodyToMono(JwksResponse.class)
-                    .block(TIMEOUT);
+            JwksResponse jwksResponse =
+                    webClient
+                            .get()
+                            .uri(APPLE_JWKS_URL)
+                            .retrieve()
+                            .bodyToMono(JwksResponse.class)
+                            .block(TIMEOUT);
 
             if (jwksResponse == null || jwksResponse.keys == null) {
                 throw new InvalidIdTokenException(
@@ -96,7 +102,9 @@ public class AppleJwksProvider {
                     PublicKey publicKey = createPublicKey(jwk);
                     keyCache.put(jwk.kid, publicKey);
                 } catch (Exception exception) {
-                    // 개별 키 파싱 실패는 무시하고 계속 진행
+                    // 개별 키 파싱 실패는 로그를 남기고 계속 진행
+                    log.warn(
+                            "Apple JWK 파싱 실패. kid: {}, error: {}", jwk.kid, exception.getMessage());
                 }
             }
 

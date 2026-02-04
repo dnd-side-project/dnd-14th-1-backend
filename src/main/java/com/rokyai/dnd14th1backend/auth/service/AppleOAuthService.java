@@ -7,14 +7,13 @@ import com.rokyai.dnd14th1backend.auth.dto.AppleIdTokenPayload;
 import com.rokyai.dnd14th1backend.auth.dto.AppleOAuthRequest;
 import com.rokyai.dnd14th1backend.auth.dto.AuthResponse;
 import com.rokyai.dnd14th1backend.auth.enums.SigninType;
+import com.rokyai.dnd14th1backend.auth.exception.InvalidIdTokenException;
 import com.rokyai.dnd14th1backend.auth.provider.AppleIdTokenVerifier;
 import com.rokyai.dnd14th1backend.auth.provider.JwtTokenProvider;
 import com.rokyai.dnd14th1backend.users.domain.User;
 import com.rokyai.dnd14th1backend.users.domain.UserIdentity;
 import com.rokyai.dnd14th1backend.users.infrastructure.UserIdentityRepository;
 import com.rokyai.dnd14th1backend.users.infrastructure.UserRepository;
-
-import com.rokyai.dnd14th1backend.auth.exception.InvalidIdTokenException;
 
 /** Apple OAuth 로그인을 처리합니다. */
 @Service
@@ -39,21 +38,24 @@ public class AppleOAuthService {
 
     public AuthResponse authenticateWithApple(AppleOAuthRequest request) {
         String idToken = request.getIdToken();
-        
+
         // ID Token 길이 검증 (Apple ID Token은 최소 100자 이상)
         if (idToken.length() < 100) {
             throw new InvalidIdTokenException(
-                    "ID Token이 너무 짧습니다. 현재 길이: " + idToken.length() 
+                    "ID Token이 너무 짧습니다. 현재 길이: "
+                            + idToken.length()
                             + "자 (정상적인 Apple ID Token은 1000자 이상입니다). "
                             + "올바른 identityToken을 전송했는지 확인하세요.");
         }
-        
+
         // JWT 형식 검증 (점이 정확히 2개여야 함 = 3개 부분)
         int dotCount = (int) idToken.chars().filter(ch -> ch == '.').count();
         if (dotCount != 2) {
             throw new InvalidIdTokenException(
                     "ID Token 형식이 유효하지 않습니다. "
-                            + "점(.)의 개수 - 예상: 2개, 실제: " + dotCount + "개. "
+                            + "점(.)의 개수 - 예상: 2개, 실제: "
+                            + dotCount
+                            + "개. "
                             + "JWT는 'header.payload.signature' 형식이어야 합니다.");
         }
 
@@ -86,7 +88,7 @@ public class AppleOAuthService {
 
         // JWT 액세스 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(userId);
-        
+
         // JWT 리프레시 토큰 생성
         String refreshToken = jwtTokenProvider.generateRefreshToken(userId);
 

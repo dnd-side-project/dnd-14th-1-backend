@@ -10,10 +10,7 @@ import org.hibernate.generator.EventTypeSets;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
-/**
- * Hibernate 6.2+ 방식의 UUID v7 생성기.
- * 시간 기반 정렬 가능한 UUID를 생성합니다.
- */
+/** Hibernate 6.2+ 방식의 UUID v7 생성기. 시간 기반 정렬 가능한 UUID를 생성합니다. */
 public class UuidV7Generator implements BeforeExecutionGenerator {
 
     @Override
