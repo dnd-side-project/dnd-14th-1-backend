@@ -43,5 +43,10 @@ out/
 .claude/
 .gemini/
 
+### Docker / SSL ###
+certbot/conf/
+data/certbot/
+nginx/ssl/ssl-dhparams.pem
+
 ### environments ###
 .env
