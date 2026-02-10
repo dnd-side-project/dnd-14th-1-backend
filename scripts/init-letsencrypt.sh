@@ -5,8 +5,19 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-domains=("13.211.132.126")
-email="rookedsysc36@gmail.com"
+# .env 파일에서 설정 로드
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="$SCRIPT_DIR/../.env"
+
+if [ ! -f "$ENV_FILE" ]; then
+  echo -e "${RED}오류: .env 파일을 찾을 수 없습니다. ($ENV_FILE)${NC}"
+  exit 1
+fi
+
+source "$ENV_FILE"
+
+domains=("$NGINX_SERVER_NAME")
+email="$CERTBOT_EMAIL"
 staging=0
 
 data_path="./certbot/conf"
@@ -14,9 +25,10 @@ www_path="./data/certbot/www"
 ssl_path="./nginx/ssl"
 
 echo -e "${GREEN}=== Let's Encrypt 인증서 초기화 스크립트 ===${NC}\n"
+echo -e "${YELLOW}서버: ${domains[0]} / 이메일: $email${NC}\n"
 
-if [ "$email" = "your-email@example.com" ]; then
-  echo -e "${RED}오류: 스크립트에서 이메일 주소를 실제 값으로 변경해주세요.${NC}"
+if [ -z "$NGINX_SERVER_NAME" ] || [ -z "$CERTBOT_EMAIL" ]; then
+  echo -e "${RED}오류: .env 파일에 NGINX_SERVER_NAME과 CERTBOT_EMAIL을 설정해주세요.${NC}"
   exit 1
 fi
 
