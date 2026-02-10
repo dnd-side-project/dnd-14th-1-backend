@@ -17,7 +17,7 @@ import com.rokyai.dnd14th1backend.badge.service.BadgeService;
 
 /** 배지 API. */
 @RestController
-@RequestMapping(version = "0.0.1", path = "/api/badges")
+@RequestMapping(version = "0.0.1", path = "/open-api/badges")
 @RequiredArgsConstructor
 @Tag(name = "배지", description = "배지 조회 API")
 public class BadgeController {
