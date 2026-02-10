@@ -45,8 +45,7 @@ services:
     environment:
       - NGINX_SERVER_NAME=${NGINX_SERVER_NAME}
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/templates:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf.template:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./nginx/docker-entrypoint.sh:/docker-entrypoint.sh:ro
       - ./data/certbot/www:/var/www/certbot:ro
