@@ -14,9 +14,7 @@ public class HealthController {
     @GetMapping("/health")
     @SkipApiResponseWrapper
     public Map<String, Object> health() {
-        return Map.of(
-                "status", "UP",
-                "timestamp", Instant.now().toString());
+        return Map.of("status", "UP", "timestamp", Instant.now().toString());
     }
 
     @GetMapping("/health/error")
