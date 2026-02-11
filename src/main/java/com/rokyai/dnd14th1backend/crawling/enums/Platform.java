@@ -4,5 +4,6 @@ package com.rokyai.dnd14th1backend.crawling.enums;
 public enum Platform {
     CLAUDE,
     CHATGPT,
+    GEMINI,
     OTHER
 }

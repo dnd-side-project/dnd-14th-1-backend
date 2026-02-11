@@ -39,6 +39,12 @@ dependencies {
     // HTTP Client
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // HTML Parsing
+    implementation 'org.jsoup:jsoup:1.18.3'
+
+    // Browser Automation
+    implementation 'com.microsoft.playwright:playwright:1.49.0'
+
     // Apple OAuth
     implementation 'com.google.guava:guava:33.0.0-jre'
 
