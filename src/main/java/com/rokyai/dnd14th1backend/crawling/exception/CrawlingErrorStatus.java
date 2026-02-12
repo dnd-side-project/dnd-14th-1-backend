@@ -15,7 +15,8 @@ public enum CrawlingErrorStatus implements StatusInterface {
 
     // 리소스 없음 (2404)
     TASK_NOT_FOUND(404, 2404, "크롤링 작업을 찾을 수 없습니다."),
-    CONVERSATION_NOT_FOUND(404, 2405, "대화를 찾을 수 없습니다."),
+    CONVERSATION_NOT_FOUND(404, 2405, "Conversation을 찾을 수 없습니다."),
+    CHAT_NOT_FOUND(404, 2406, "Chat을 찾을 수 없습니다."),
 
     // 서버 오류 (2500)
     CRAWLING_FAILED(500, 2500, "크롤링에 실패했습니다."),

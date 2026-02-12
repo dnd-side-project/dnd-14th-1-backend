@@ -46,16 +46,17 @@ public class GeminiCrawler implements PlatformCrawler {
                     Pattern.CASE_INSENSITIVE);
 
     // share ID
-    private static final Pattern SHARE_ID_PATTERN =
-            Pattern.compile(".*/share/([a-zA-Z0-9_-]+)");
+    private static final Pattern SHARE_ID_PATTERN = Pattern.compile(".*/share/([a-zA-Z0-9_-]+)");
 
     // 공유 페이지 HTML에서 cfb2h 추출
-    private static final Pattern BL_PARAM_PATTERN =
-            Pattern.compile("\"cfb2h\":\"([^\"]+)\"");
+    private static final Pattern BL_PARAM_PATTERN = Pattern.compile("\"cfb2h\":\"([^\"]+)\"");
 
     // batchexecute에서 JSON 문자열 추출
     private static final Pattern BATCH_DATA_PATTERN =
-            Pattern.compile("\\[\"wrb\\.fr\",\"" + RPC_METHOD + "\",\"(.*)\",null,null,null,\"generic\"\\]");
+            Pattern.compile(
+                    "\\[\"wrb\\.fr\",\""
+                            + RPC_METHOD
+                            + "\",\"(.*)\",null,null,null,\"generic\"\\]");
 
     // 사용자 메시지 -> [["메시지"],2,null,0,"turnId",0]
     private static final Pattern USER_MESSAGE_PATTERN =
@@ -157,31 +158,39 @@ public class GeminiCrawler implements PlatformCrawler {
      */
     private String callBatchExecute(String shareId, String blParam) {
         String requestBody =
-                String.format("[[[\"%s\",\"[null,\\\"%s\\\"]\",null,\"generic\"]]]", RPC_METHOD, shareId);
+                String.format(
+                        "[[[\"%s\",\"[null,\\\"%s\\\"]\",null,\"generic\"]]]", RPC_METHOD, shareId);
 
         try {
             String response =
                     webClient
                             .post()
-                            .uri(uriBuilder ->
-                                    uriBuilder
-                                            .path(BATCHEXECUTE_PATH)
-                                            .queryParam("bl", blParam)
-                                            .queryParam("hl", "ko")
-                                            .queryParam("_reqid", "0")
-                                            .queryParam("rt", "c")
-                                            .queryParam("source-path", "/share/" + shareId)
-                                            .build())
-                            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                            .uri(
+                                    uriBuilder ->
+                                            uriBuilder
+                                                    .path(BATCHEXECUTE_PATH)
+                                                    .queryParam("bl", blParam)
+                                                    .queryParam("hl", "ko")
+                                                    .queryParam("_reqid", "0")
+                                                    .queryParam("rt", "c")
+                                                    .queryParam("source-path", "/share/" + shareId)
+                                                    .build())
+                            .header(
+                                    HttpHeaders.CONTENT_TYPE,
+                                    MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                             .header(HttpHeaders.ORIGIN, GEMINI_BASE)
                             .header(HttpHeaders.REFERER, GEMINI_BASE + "/share/" + shareId)
-                            .bodyValue("f.req=" + URLEncoder.encode(requestBody, StandardCharsets.UTF_8))
+                            .bodyValue(
+                                    "f.req="
+                                            + URLEncoder.encode(
+                                                    requestBody, StandardCharsets.UTF_8))
                             .retrieve()
                             .bodyToMono(String.class)
                             .block();
 
             if (response == null || response.isBlank()) {
-                throw new CrawlingException(CrawlingErrorStatus.CRAWLING_FAILED, "batchexecute 응답이 비어있습니다.");
+                throw new CrawlingException(
+                        CrawlingErrorStatus.CRAWLING_FAILED, "batchexecute 응답이 비어있습니다.");
             }
 
             return response;
@@ -192,8 +201,10 @@ public class GeminiCrawler implements PlatformCrawler {
         } catch (WebClientResponseException.Forbidden e) {
             throw new CrawlingException(CrawlingErrorStatus.CRAWLING_FAILED, "접근이 거부되었습니다.");
         } catch (WebClientResponseException e) {
-            log.error("Gemini batchexecute 호출 실패: status={}, body={}",
-                    e.getStatusCode(), e.getResponseBodyAsString());
+            log.error(
+                    "Gemini batchexecute 호출 실패: status={}, body={}",
+                    e.getStatusCode(),
+                    e.getResponseBodyAsString());
             throw new CrawlingException(
                     CrawlingErrorStatus.CRAWLING_FAILED, "API 호출 실패: " + e.getMessage());
         }
@@ -210,16 +221,13 @@ public class GeminiCrawler implements PlatformCrawler {
         String data = extractDataFromResponse(rawResponse);
 
         // 이스케이프 해제 (데이터가 JSON 문자열로 감싸져 있음)
-        String normalized = data.replace("\\\"", "\"")
-                .replace("\\\\n", "\n")
-                .replace("\\\\", "\\");
+        String normalized = data.replace("\\\"", "\"").replace("\\\\n", "\n").replace("\\\\", "\\");
 
         List<CrawledMessage> messages = extractMessages(normalized);
 
         if (messages.isEmpty()) {
             log.warn("batchexecute 응답에서 메시지를 추출할 수 없습니다.");
-            throw new CrawlingException(
-                    CrawlingErrorStatus.CRAWLING_FAILED, "대화 내용을 찾을 수 없습니다");
+            throw new CrawlingException(CrawlingErrorStatus.CRAWLING_FAILED, "대화 내용을 찾을 수 없습니다");
         }
 
         log.info("Gemini 크롤링 완료: messageCount={}", messages.size());
@@ -296,9 +304,7 @@ public class GeminiCrawler implements PlatformCrawler {
 
             int searchStart = userMsg.end;
             int searchEnd =
-                    (i + 1 < userMessages.size())
-                            ? userMessages.get(i + 1).start
-                            : data.length();
+                    (i + 1 < userMessages.size()) ? userMessages.get(i + 1).start : data.length();
 
             String segment = data.substring(searchStart, searchEnd);
             String responseText = extractResponseFromSegment(segment);

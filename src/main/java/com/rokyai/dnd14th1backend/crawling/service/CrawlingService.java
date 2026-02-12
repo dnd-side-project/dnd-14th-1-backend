@@ -12,8 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import com.rokyai.dnd14th1backend.crawling.crawler.CrawlerRegistry;
+import com.rokyai.dnd14th1backend.crawling.domain.Chat;
 import com.rokyai.dnd14th1backend.crawling.domain.Conversation;
 import com.rokyai.dnd14th1backend.crawling.domain.CrawlingTask;
+import com.rokyai.dnd14th1backend.crawling.dto.ChatListResponse;
+import com.rokyai.dnd14th1backend.crawling.dto.ChatResponse;
 import com.rokyai.dnd14th1backend.crawling.dto.ConversationResponse;
 import com.rokyai.dnd14th1backend.crawling.dto.CrawlingResponse;
 import com.rokyai.dnd14th1backend.crawling.dto.CrawlingStatusResponse;
@@ -21,6 +24,7 @@ import com.rokyai.dnd14th1backend.crawling.dto.CrawlingTaskSummary;
 import com.rokyai.dnd14th1backend.crawling.enums.Platform;
 import com.rokyai.dnd14th1backend.crawling.exception.CrawlingErrorStatus;
 import com.rokyai.dnd14th1backend.crawling.exception.CrawlingException;
+import com.rokyai.dnd14th1backend.crawling.infrastructure.ChatRepository;
 import com.rokyai.dnd14th1backend.crawling.infrastructure.ConversationRepository;
 import com.rokyai.dnd14th1backend.crawling.infrastructure.CrawlingTaskRepository;
 
@@ -33,16 +37,19 @@ public class CrawlingService {
 
     private final CrawlingTaskRepository crawlingTaskRepository;
     private final ConversationRepository conversationRepository;
+    private final ChatRepository chatRepository;
     private final CrawlingExecutor crawlingExecutor;
     private final CrawlerRegistry crawlerRegistry;
 
     public CrawlingService(
             CrawlingTaskRepository crawlingTaskRepository,
             ConversationRepository conversationRepository,
+            ChatRepository chatRepository,
             CrawlingExecutor crawlingExecutor,
             CrawlerRegistry crawlerRegistry) {
         this.crawlingTaskRepository = crawlingTaskRepository;
         this.conversationRepository = conversationRepository;
+        this.chatRepository = chatRepository;
         this.crawlingExecutor = crawlingExecutor;
         this.crawlerRegistry = crawlerRegistry;
     }
@@ -154,5 +161,64 @@ public class CrawlingService {
         return crawlingTaskRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
                 .map(CrawlingTaskSummary::from)
                 .toList();
+    }
+
+    /**
+     * Chat 목록 조회
+     *
+     * @param conversationId 대화 ID
+     * @return Chat 목록 응답
+     */
+    @Transactional(readOnly = true)
+    public ChatListResponse getChats(UUID conversationId) {
+        Conversation conversation =
+                conversationRepository
+                        .findById(conversationId)
+                        .orElseThrow(
+                                () ->
+                                        new CrawlingException(
+                                                CrawlingErrorStatus.CONVERSATION_NOT_FOUND));
+
+        List<ChatResponse> chatResponses =
+                chatRepository.findByConversationIdOrderBySequenceAsc(conversationId).stream()
+                        .map(ChatResponse::from)
+                        .toList();
+
+        return new ChatListResponse(conversation.getId(), conversation.getTitle(), chatResponses);
+    }
+
+    /**
+     * Chat 단일 조회
+     *
+     * @param conversationId 대화 ID
+     * @param chatId Chat ID
+     * @return Chat 응답
+     */
+    @Transactional(readOnly = true)
+    public ChatResponse getChat(UUID conversationId, UUID chatId) {
+        Chat chat =
+                chatRepository
+                        .findByIdAndConversationId(chatId, conversationId)
+                        .orElseThrow(
+                                () -> new CrawlingException(CrawlingErrorStatus.CHAT_NOT_FOUND));
+
+        return ChatResponse.from(chat);
+    }
+
+    /**
+     * Chat 삭제
+     *
+     * @param conversationId 대화 ID
+     * @param chatId Chat ID
+     */
+    @Transactional
+    public void deleteChat(UUID conversationId, UUID chatId) {
+        Chat chat =
+                chatRepository
+                        .findByIdAndConversationId(chatId, conversationId)
+                        .orElseThrow(
+                                () -> new CrawlingException(CrawlingErrorStatus.CHAT_NOT_FOUND));
+
+        chatRepository.delete(chat);
     }
 }

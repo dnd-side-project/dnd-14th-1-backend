@@ -7,8 +7,6 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
-
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
@@ -16,6 +14,9 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.rokyai.dnd14th1backend.crawling.crawler.CrawledConversation;
 import com.rokyai.dnd14th1backend.crawling.crawler.CrawledConversation.CrawledMessage;
 import com.rokyai.dnd14th1backend.crawling.crawler.PlatformCrawler;
@@ -103,8 +104,7 @@ public class ChatGptCrawler implements PlatformCrawler, DisposableBean {
     private List<CrawledMessage> extractMessages(Page page) {
         List<CrawledMessage> messages = new ArrayList<>();
 
-        List<Locator> elements =
-                page.locator("[data-message-author-role]").all();
+        List<Locator> elements = page.locator("[data-message-author-role]").all();
 
         for (Locator element : elements) {
             String role = element.getAttribute("data-message-author-role");

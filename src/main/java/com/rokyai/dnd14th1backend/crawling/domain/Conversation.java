@@ -73,6 +73,11 @@ public class Conversation {
     @Builder.Default
     private List<Message> messages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sequence ASC")
+    @Builder.Default
+    private List<Chat> chats = new ArrayList<>();
+
     /**
      * 대화 세션생성
      *
@@ -97,5 +102,14 @@ public class Conversation {
      */
     public void addMessage(Message message) {
         this.messages.add(message);
+    }
+
+    /**
+     * Chat 추가
+     *
+     * @param chat 추가할 Chat
+     */
+    public void addChat(Chat chat) {
+        this.chats.add(chat);
     }
 }

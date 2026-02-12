@@ -14,10 +14,12 @@ import com.rokyai.dnd14th1backend.crawling.crawler.CrawledConversation;
 import com.rokyai.dnd14th1backend.crawling.crawler.CrawledConversation.CrawledMessage;
 import com.rokyai.dnd14th1backend.crawling.crawler.CrawlerRegistry;
 import com.rokyai.dnd14th1backend.crawling.crawler.PlatformCrawler;
+import com.rokyai.dnd14th1backend.crawling.domain.Chat;
 import com.rokyai.dnd14th1backend.crawling.domain.Conversation;
 import com.rokyai.dnd14th1backend.crawling.domain.CrawlingTask;
 import com.rokyai.dnd14th1backend.crawling.domain.Message;
 import com.rokyai.dnd14th1backend.crawling.enums.CrawlingStatus;
+import com.rokyai.dnd14th1backend.crawling.enums.MessageRole;
 import com.rokyai.dnd14th1backend.crawling.exception.CrawlingErrorStatus;
 import com.rokyai.dnd14th1backend.crawling.exception.CrawlingException;
 import com.rokyai.dnd14th1backend.crawling.infrastructure.ConversationRepository;
@@ -152,6 +154,9 @@ public class CrawlingExecutor {
             conversation.addMessage(message);
         }
 
+        // 메시지를 Chat(질의/응답 쌍)으로 묶어 생성
+        createChats(conversation, crawledData.messages());
+
         Conversation saved = conversationRepository.save(conversation);
         log.info(
                 "크롤링 완료: taskId={}, conversationId={}, messageCount={}",
@@ -160,5 +165,42 @@ public class CrawlingExecutor {
                 saved.getMessages().size());
 
         return saved;
+    }
+
+    /**
+     * 메시지 질의응답을 한 쌍으로 묶어 Chat 생성
+     *
+     * @param conversation 대화 세션
+     * @param crawledMessages 크롤링된 메시지 목록
+     */
+    private void createChats(
+            Conversation conversation, java.util.List<CrawledMessage> crawledMessages) {
+        int chatSequence = 1;
+        int i = 0;
+
+        while (i < crawledMessages.size()) {
+            CrawledMessage current = crawledMessages.get(i);
+
+            if (current.role() == MessageRole.USER) {
+                String userContent = current.content();
+                String assistantContent = null;
+
+                // 다음 메시지가 ASSISTANT이면 쌍으로 묶음
+                if (i + 1 < crawledMessages.size()
+                        && crawledMessages.get(i + 1).role() == MessageRole.ASSISTANT) {
+                    assistantContent = crawledMessages.get(i + 1).content();
+                    i += 2;
+                } else {
+                    i++;
+                }
+
+                Chat chat =
+                        Chat.create(conversation, userContent, assistantContent, chatSequence++);
+                conversation.addChat(chat);
+            } else {
+                // ASSISTANT만 단독으로 있는 경우 건너뜀
+                i++;
+            }
+        }
     }
 }
