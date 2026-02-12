@@ -1,5 +1,6 @@
 package com.rokyai.dnd14th1backend.crawling.infrastructure;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,4 +25,12 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
             "SELECT c FROM Conversation c LEFT JOIN FETCH c.messages WHERE c.crawlingTask.id = :crawlingTaskId")
     Optional<Conversation> findByCrawlingTaskIdWithMessages(
             @Param("crawlingTaskId") UUID crawlingTaskId);
+
+    /**
+     * 사용자 ID로 대화 목록 조회 (최신순)
+     *
+     * @param userId 사용자 ID
+     * @return 대화 목록
+     */
+    List<Conversation> findByUserIdOrderByCreatedAtDesc(UUID userId);
 }

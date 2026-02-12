@@ -53,11 +53,11 @@ public class Conversation {
     @Column(length = 500)
     private String title;
 
-    @Column(name = "source_url", nullable = false, length = 2048)
+    @Column(name = "source_url", length = 2048)
     private String sourceUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private Platform platform;
 
     @CreationTimestamp
@@ -93,6 +93,17 @@ public class Conversation {
                 .sourceUrl(crawlingTask.getSourceUrl())
                 .platform(crawlingTask.getPlatform())
                 .build();
+    }
+
+    /**
+     * 사용자 생성 Conversation
+     *
+     * @param userId 사용자 ID
+     * @param title 대화 제목
+     * @return 생성된 Conversation
+     */
+    public static Conversation createByUser(UUID userId, String title) {
+        return Conversation.builder().userId(userId).title(title).build();
     }
 
     /**

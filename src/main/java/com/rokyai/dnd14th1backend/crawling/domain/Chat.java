@@ -21,9 +21,7 @@ import lombok.NoArgsConstructor;
 
 import com.rokyai.dnd14th1backend.common.util.UuidV7;
 
-/** Chat 엔티티
- *  Chat = 한 번의 (사용자) 질의 + (AI) 응답 쌍
-*/
+/** Chat 엔티티, Chat = 한 번의 (사용자) 질의 + (AI) 응답 쌍 */
 @Entity
 @Table(name = "chats")
 @Getter
