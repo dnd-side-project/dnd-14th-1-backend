@@ -95,6 +95,7 @@ public class ConversationController {
      * Conversation 단건 조회
      *
      * @param conversationId 대화 ID
+     * @param userId 사용자 ID
      * @return Conversation 응답
      */
     @GetMapping("/{conversationId}")
@@ -114,8 +115,9 @@ public class ConversationController {
                 @ApiResponse(responseCode = "404", description = "대화를 찾을 수 없음"),
             })
     public ResponseEntity<ConversationResponse> getConversation(
-            @Parameter(description = "대화 ID") @PathVariable UUID conversationId) {
-        ConversationResponse response = conversationService.getConversation(conversationId);
+            @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+        ConversationResponse response = conversationService.getConversation(userId, conversationId);
         return ResponseEntity.ok(response);
     }
 
@@ -123,6 +125,7 @@ public class ConversationController {
      * Conversation 삭제
      *
      * @param conversationId 대화 ID
+     * @param userId 사용자 ID
      * @return 204 No Content
      */
     @DeleteMapping("/{conversationId}")
@@ -133,8 +136,9 @@ public class ConversationController {
                 @ApiResponse(responseCode = "404", description = "대화를 찾을 수 없음"),
             })
     public ResponseEntity<Void> deleteConversation(
-            @Parameter(description = "대화 ID") @PathVariable UUID conversationId) {
-        conversationService.deleteConversation(conversationId);
+            @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+        conversationService.deleteConversation(userId, conversationId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -143,6 +147,7 @@ public class ConversationController {
      *
      * @param conversationId 대화 ID
      * @param request 생성 요청
+     * @param userId 사용자 ID
      * @return Chat 응답
      */
     @PostMapping("/{conversationId}/chats")
@@ -160,10 +165,11 @@ public class ConversationController {
             })
     public ResponseEntity<ChatResponse> createChat(
             @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
-            @Valid @RequestBody CreateChatRequest request) {
+            @Valid @RequestBody CreateChatRequest request,
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
         ChatResponse response =
                 conversationService.createChat(
-                        conversationId, request.userContent(), request.assistantContent());
+                        userId, conversationId, request.userContent(), request.assistantContent());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -171,6 +177,7 @@ public class ConversationController {
      * Chat 목록 조회
      *
      * @param conversationId 대화 ID
+     * @param userId 사용자 ID
      * @return Chat 목록 응답
      */
     @GetMapping("/{conversationId}/chats")
@@ -187,8 +194,9 @@ public class ConversationController {
                 @ApiResponse(responseCode = "404", description = "대화를 찾을 수 없음"),
             })
     public ResponseEntity<ChatListResponse> getChats(
-            @Parameter(description = "대화 ID") @PathVariable UUID conversationId) {
-        ChatListResponse response = conversationService.getChats(conversationId);
+            @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+        ChatListResponse response = conversationService.getChats(userId, conversationId);
         return ResponseEntity.ok(response);
     }
 
@@ -197,6 +205,7 @@ public class ConversationController {
      *
      * @param conversationId 대화 ID
      * @param chatId Chat ID
+     * @param userId 사용자 ID
      * @return Chat 응답
      */
     @GetMapping("/{conversationId}/chats/{chatId}")
@@ -214,8 +223,9 @@ public class ConversationController {
             })
     public ResponseEntity<ChatResponse> getChat(
             @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
-            @Parameter(description = "Chat ID") @PathVariable UUID chatId) {
-        ChatResponse response = conversationService.getChat(conversationId, chatId);
+            @Parameter(description = "Chat ID") @PathVariable UUID chatId,
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+        ChatResponse response = conversationService.getChat(userId, conversationId, chatId);
         return ResponseEntity.ok(response);
     }
 
@@ -224,6 +234,7 @@ public class ConversationController {
      *
      * @param conversationId 대화 ID
      * @param chatId Chat ID
+     * @param userId 사용자 ID
      * @return 204 No Content
      */
     @DeleteMapping("/{conversationId}/chats/{chatId}")
@@ -235,8 +246,9 @@ public class ConversationController {
             })
     public ResponseEntity<Void> deleteChat(
             @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
-            @Parameter(description = "Chat ID") @PathVariable UUID chatId) {
-        conversationService.deleteChat(conversationId, chatId);
+            @Parameter(description = "Chat ID") @PathVariable UUID chatId,
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+        conversationService.deleteChat(userId, conversationId, chatId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

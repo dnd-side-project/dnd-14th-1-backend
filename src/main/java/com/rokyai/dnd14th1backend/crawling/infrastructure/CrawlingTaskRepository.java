@@ -1,6 +1,7 @@
 package com.rokyai.dnd14th1backend.crawling.infrastructure;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,10 +25,11 @@ public interface CrawlingTaskRepository extends JpaRepository<CrawlingTask, UUID
     List<CrawlingTask> findByUserIdOrderByCreatedAtDesc(@Param("userId") UUID userId);
 
     /**
-     * 모든 크롤링 작업 목록을 조회 (관리자용)
+     * 작업 ID + 사용자 ID로 크롤링 작업 조회
      *
-     * @return 크롤링 작업 목록 (최신순)
+     * @param id 작업 ID
+     * @param userId 사용자 ID
+     * @return 크롤링 작업 (Optional)
      */
-    @Query("SELECT t FROM CrawlingTask t ORDER BY t.createdAt DESC")
-    List<CrawlingTask> findAllOrderByCreatedAtDesc();
+    Optional<CrawlingTask> findByIdAndUserId(UUID id, UUID userId);
 }

@@ -67,8 +67,7 @@ public class CrawlingController {
             })
     public ResponseEntity<CrawlingResponse> requestCrawling(
             @Valid @RequestBody CrawlingRequest request,
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false)
-                    UUID userId) {
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
         CrawlingResponse response = crawlingService.requestCrawling(request.url(), userId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -77,6 +76,7 @@ public class CrawlingController {
      * 크롤링 상태 조회
      *
      * @param taskId 작업 ID
+     * @param userId 사용자 ID
      * @return 상태 응답
      */
     @GetMapping("/{taskId}/status")
@@ -96,8 +96,9 @@ public class CrawlingController {
                 @ApiResponse(responseCode = "404", description = "작업을 찾을 수 없음"),
             })
     public ResponseEntity<CrawlingStatusResponse> getStatus(
-            @Parameter(description = "작업 ID") @PathVariable UUID taskId) {
-        CrawlingStatusResponse response = crawlingService.getStatus(taskId);
+            @Parameter(description = "작업 ID") @PathVariable UUID taskId,
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+        CrawlingStatusResponse response = crawlingService.getStatus(taskId, userId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -105,6 +106,7 @@ public class CrawlingController {
      * 크롤링 결과 조회
      *
      * @param taskId 작업 ID
+     * @param userId 사용자 ID
      * @return 대화 응답
      */
     @GetMapping("/{taskId}/result")
@@ -125,25 +127,10 @@ public class CrawlingController {
                 @ApiResponse(responseCode = "500", description = "크롤링 미완료"),
             })
     public ResponseEntity<ConversationResponse> getResult(
-            @Parameter(description = "작업 ID") @PathVariable UUID taskId) {
-        ConversationResponse response = crawlingService.getResult(taskId);
+            @Parameter(description = "작업 ID") @PathVariable UUID taskId,
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+        ConversationResponse response = crawlingService.getResult(taskId, userId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    /**
-     * (ADMIN) 모든 크롤링 작업 목록 조회
-     *
-     * @return 작업 목록
-     */
-    @GetMapping("/admin/tasks")
-    @Operation(summary = "전체 작업 목록 조회 (ADMIN)", description = "모든 크롤링 작업 목록을 조회합니다. 관리자 조회용 API")
-    @ApiResponses(
-            value = {
-                @ApiResponse(responseCode = "200", description = "목록 조회 성공"),
-            })
-    public ResponseEntity<List<CrawlingTaskSummary>> getAllTasks() {
-        List<CrawlingTaskSummary> tasks = crawlingService.getAllTasks();
-        return ResponseEntity.status(HttpStatus.OK).body(tasks);
     }
 
     /**
@@ -157,15 +144,10 @@ public class CrawlingController {
     @ApiResponses(
             value = {
                 @ApiResponse(responseCode = "200", description = "목록 조회 성공"),
-                @ApiResponse(responseCode = "401", description = "인증 필요"),
             })
     public ResponseEntity<List<CrawlingTaskSummary>> getMyTasks(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false)
-                    UUID userId) {
-        List<CrawlingTaskSummary> tasks =
-                userId != null
-                        ? crawlingService.getTasksByUser(userId)
-                        : List.of(); // 인증되지 않은 사용자는 빈 목록 반환
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+        List<CrawlingTaskSummary> tasks = crawlingService.getTasksByUser(userId);
         return ResponseEntity.status(HttpStatus.OK).body(tasks);
     }
 }

@@ -33,4 +33,13 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
      * @return 대화 목록
      */
     List<Conversation> findByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    /**
+     * 대화 ID + 사용자 ID로 대화 조회
+     *
+     * @param id 대화 ID
+     * @param userId 사용자 ID
+     * @return 대화 (Optional)
+     */
+    Optional<Conversation> findByIdAndUserId(UUID id, UUID userId);
 }

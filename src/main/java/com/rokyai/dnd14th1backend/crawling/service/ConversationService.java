@@ -59,41 +59,32 @@ public class ConversationService {
     /**
      * Conversation 단건 조회
      *
+     * @param userId 사용자 ID
      * @param conversationId 대화 ID
      * @return 대화 응답
      */
     @Transactional(readOnly = true)
-    public ConversationResponse getConversation(UUID conversationId) {
-        Conversation conversation =
-                conversationRepository
-                        .findById(conversationId)
-                        .orElseThrow(
-                                () ->
-                                        new CrawlingException(
-                                                CrawlingErrorStatus.CONVERSATION_NOT_FOUND));
+    public ConversationResponse getConversation(UUID userId, UUID conversationId) {
+        Conversation conversation = findConversationByUser(userId, conversationId);
         return ConversationResponse.from(conversation);
     }
 
     /**
      * Conversation 삭제 (cascade로 Chat도 삭제)
      *
+     * @param userId 사용자 ID
      * @param conversationId 대화 ID
      */
     @Transactional
-    public void deleteConversation(UUID conversationId) {
-        Conversation conversation =
-                conversationRepository
-                        .findById(conversationId)
-                        .orElseThrow(
-                                () ->
-                                        new CrawlingException(
-                                                CrawlingErrorStatus.CONVERSATION_NOT_FOUND));
+    public void deleteConversation(UUID userId, UUID conversationId) {
+        Conversation conversation = findConversationByUser(userId, conversationId);
         conversationRepository.delete(conversation);
     }
 
     /**
      * Chat 생성
      *
+     * @param userId 사용자 ID
      * @param conversationId 대화 ID
      * @param userContent 사용자 질의 내용
      * @param assistantContent 응답 내용 (nullable)
@@ -101,14 +92,8 @@ public class ConversationService {
      */
     @Transactional
     public ChatResponse createChat(
-            UUID conversationId, String userContent, String assistantContent) {
-        Conversation conversation =
-                conversationRepository
-                        .findById(conversationId)
-                        .orElseThrow(
-                                () ->
-                                        new CrawlingException(
-                                                CrawlingErrorStatus.CONVERSATION_NOT_FOUND));
+            UUID userId, UUID conversationId, String userContent, String assistantContent) {
+        Conversation conversation = findConversationByUser(userId, conversationId);
 
         int nextSequence = chatRepository.findMaxSequenceByConversationId(conversationId) + 1;
         Chat chat = Chat.create(conversation, userContent, assistantContent, nextSequence);
@@ -119,18 +104,13 @@ public class ConversationService {
     /**
      * Chat 목록 조회
      *
+     * @param userId 사용자 ID
      * @param conversationId 대화 ID
      * @return Chat 목록 응답
      */
     @Transactional(readOnly = true)
-    public ChatListResponse getChats(UUID conversationId) {
-        Conversation conversation =
-                conversationRepository
-                        .findById(conversationId)
-                        .orElseThrow(
-                                () ->
-                                        new CrawlingException(
-                                                CrawlingErrorStatus.CONVERSATION_NOT_FOUND));
+    public ChatListResponse getChats(UUID userId, UUID conversationId) {
+        Conversation conversation = findConversationByUser(userId, conversationId);
 
         List<ChatResponse> chatResponses =
                 chatRepository.findByConversationIdOrderBySequenceAsc(conversationId).stream()
@@ -143,12 +123,14 @@ public class ConversationService {
     /**
      * Chat 단일 조회
      *
+     * @param userId 사용자 ID
      * @param conversationId 대화 ID
      * @param chatId Chat ID
      * @return Chat 응답
      */
     @Transactional(readOnly = true)
-    public ChatResponse getChat(UUID conversationId, UUID chatId) {
+    public ChatResponse getChat(UUID userId, UUID conversationId, UUID chatId) {
+        findConversationByUser(userId, conversationId);
         Chat chat =
                 chatRepository
                         .findByIdAndConversationId(chatId, conversationId)
@@ -160,16 +142,25 @@ public class ConversationService {
     /**
      * Chat 삭제
      *
+     * @param userId 사용자 ID
      * @param conversationId 대화 ID
      * @param chatId Chat ID
      */
     @Transactional
-    public void deleteChat(UUID conversationId, UUID chatId) {
+    public void deleteChat(UUID userId, UUID conversationId, UUID chatId) {
+        findConversationByUser(userId, conversationId);
         Chat chat =
                 chatRepository
                         .findByIdAndConversationId(chatId, conversationId)
                         .orElseThrow(
                                 () -> new CrawlingException(CrawlingErrorStatus.CHAT_NOT_FOUND));
         chatRepository.delete(chat);
+    }
+
+    private Conversation findConversationByUser(UUID userId, UUID conversationId) {
+        return conversationRepository
+                .findByIdAndUserId(conversationId, userId)
+                .orElseThrow(
+                        () -> new CrawlingException(CrawlingErrorStatus.CONVERSATION_NOT_FOUND));
     }
 }
