@@ -56,9 +56,19 @@ CREATE TABLE chats (
     user_content TEXT NOT NULL,
     assistant_content TEXT,
     sequence INTEGER NOT NULL,
+    token_saving INTEGER,
+    xp_earned INTEGER,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT uq_chats_conversation_sequence UNIQUE (conversation_id, sequence)
+);
+
+CREATE TABLE user_game_profiles (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL UNIQUE REFERENCES users(id),
+    total_xp BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
