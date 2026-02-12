@@ -48,6 +48,12 @@ public class Chat {
     @Column(nullable = false)
     private Integer sequence;
 
+    @Column(name = "token_saving")
+    private Integer tokenSaving;
+
+    @Column(name = "xp_earned")
+    private Integer xpEarned;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -73,5 +79,14 @@ public class Chat {
                 .assistantContent(assistantContent)
                 .sequence(sequence)
                 .build();
+    }
+
+    public void applyOptimization(int tokenSaving, int xpEarned) {
+        this.tokenSaving = tokenSaving;
+        this.xpEarned = xpEarned;
+    }
+
+    public boolean isOptimized() {
+        return this.xpEarned != null;
     }
 }

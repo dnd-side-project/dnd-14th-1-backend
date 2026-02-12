@@ -29,6 +29,9 @@ import com.rokyai.dnd14th1backend.crawling.dto.ConversationResponse;
 import com.rokyai.dnd14th1backend.crawling.dto.CreateChatRequest;
 import com.rokyai.dnd14th1backend.crawling.dto.CreateConversationRequest;
 import com.rokyai.dnd14th1backend.crawling.service.ConversationService;
+import com.rokyai.dnd14th1backend.users.dto.OptimizeChatRequest;
+import com.rokyai.dnd14th1backend.users.dto.OptimizeChatResponse;
+import com.rokyai.dnd14th1backend.users.service.UserGameService;
 
 /** Conversation, Chat 컨트롤러 */
 @RestController
@@ -37,9 +40,12 @@ import com.rokyai.dnd14th1backend.crawling.service.ConversationService;
 public class ConversationController {
 
     private final ConversationService conversationService;
+    private final UserGameService userGameService;
 
-    public ConversationController(ConversationService conversationService) {
+    public ConversationController(
+            ConversationService conversationService, UserGameService userGameService) {
         this.conversationService = conversationService;
+        this.userGameService = userGameService;
     }
 
     /**
@@ -250,5 +256,41 @@ public class ConversationController {
             @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
         conversationService.deleteChat(userId, conversationId, chatId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    /**
+     * Chat 최적화 결과 제출 + XP 적립
+     *
+     * @param conversationId 대화 ID
+     * @param chatId Chat ID
+     * @param request 최적화 요청
+     * @param userId 사용자 ID
+     * @return 최적화 응답 (XP, 티어 정보)
+     */
+    @PostMapping("/{conversationId}/chats/{chatId}/optimize")
+    @Operation(summary = "Chat 최적화", description = "Chat의 프롬프트 최적화 결과를 제출하고 XP를 적립합니다")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "최적화 성공",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                OptimizeChatResponse.class))),
+                @ApiResponse(responseCode = "400", description = "이미 최적화된 Chat"),
+                @ApiResponse(responseCode = "404", description = "대화 또는 Chat을 찾을 수 없음"),
+            })
+    public ResponseEntity<OptimizeChatResponse> optimizeChat(
+            @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
+            @Parameter(description = "Chat ID") @PathVariable UUID chatId,
+            @Valid @RequestBody OptimizeChatRequest request,
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+        OptimizeChatResponse response =
+                userGameService.optimizeChat(userId, conversationId, chatId, request.tokenSaving());
+        return ResponseEntity.ok(response);
     }
 }
