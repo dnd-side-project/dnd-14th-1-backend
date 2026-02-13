@@ -1,6 +1,9 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+  threads:
+    virtual:
+      enabled: true
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:dnd_14}
     username: ${DB_USER:root}
@@ -32,3 +35,7 @@ apple:
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+app:
+  security:
+    enabled: ${SECURITY_ENABLED:true}  # 로컬 개발 시 false로 설정
