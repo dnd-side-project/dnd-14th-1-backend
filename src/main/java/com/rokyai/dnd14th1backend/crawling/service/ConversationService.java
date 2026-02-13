@@ -157,6 +157,27 @@ public class ConversationService {
         chatRepository.delete(chat);
     }
 
+    /**
+     * Conversation 자동 생성 후 Chat 생성
+     *
+     * @param userId 사용자 ID
+     * @param userContent 사용자 질의 내용
+     * @param assistantContent 응답 내용 (nullable)
+     * @return Chat 응답
+     */
+    @Transactional
+    public ChatResponse createChatAutoConversation(
+            UUID userId, String userContent, String assistantContent) {
+        String title =
+                userContent.length() > 50 ? userContent.substring(0, 50) + "..." : userContent;
+        Conversation conversation = Conversation.createByUser(userId, title);
+        conversationRepository.save(conversation);
+
+        Chat chat = Chat.create(conversation, userContent, assistantContent, 1);
+        chatRepository.save(chat);
+        return ChatResponse.from(chat);
+    }
+
     private Conversation findConversationByUser(UUID userId, UUID conversationId) {
         return conversationRepository
                 .findByIdAndUserId(conversationId, userId)

@@ -11,6 +11,7 @@ import com.rokyai.dnd14th1backend.crawling.domain.Chat;
 @Schema(description = "Chat 응답")
 public record ChatResponse(
         @Schema(description = "Chat ID") UUID id,
+        @Schema(description = "Conversation ID") UUID conversationId,
         @Schema(description = "사용자 질의 내용") String userContent,
         @Schema(description = "응답 내용") String assistantContent,
         @Schema(description = "순서") int sequence,
@@ -25,6 +26,7 @@ public record ChatResponse(
     public static ChatResponse from(Chat chat) {
         return new ChatResponse(
                 chat.getId(),
+                chat.getConversation().getId(),
                 chat.getUserContent(),
                 chat.getAssistantContent(),
                 chat.getSequence(),

@@ -149,6 +149,36 @@ public class ConversationController {
     }
 
     /**
+     * Conversation 참조 없이 Chat 생성 (직접입력용)
+     *
+     * @param request 생성 요청
+     * @param userId 사용자 ID
+     * @return Chat 응답 (conversationId 포함)
+     */
+    @PostMapping("/chats")
+    @Operation(
+            summary = "Chat 생성 (Conversation 자동 생성)",
+            description = "Conversation 참조 없이 (자동 생성 뒤) Chat을 추가합니다")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "201",
+                        description = "생성 성공",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = ChatResponse.class))),
+            })
+    public ResponseEntity<ChatResponse> createChatAutoConversation(
+            @Valid @RequestBody CreateChatRequest request,
+            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+        ChatResponse response =
+                conversationService.createChatAutoConversation(
+                        userId, request.userContent(), request.assistantContent());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
      * Chat 생성
      *
      * @param conversationId 대화 ID
