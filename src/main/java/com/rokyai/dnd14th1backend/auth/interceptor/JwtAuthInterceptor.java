@@ -34,9 +34,9 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(
             HttpServletRequest request, HttpServletResponse response, Object handler) {
-        // 인증하지 않고 크롤링 수행 (개발용)
         if (!securityEnabled) {
             log.debug("보안이 비활성화되어 인증을 스킵합니다");
+            request.setAttribute("userId", UUID.fromString("00000000-0000-0000-0000-000000000000"));
             return true;
         }
 

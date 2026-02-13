@@ -1,5 +1,6 @@
 package com.rokyai.dnd14th1backend.crawling.crawler.claude;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -105,7 +106,7 @@ public class ClaudeCrawler implements PlatformCrawler {
                             .uri(apiPath)
                             .retrieve()
                             .bodyToMono(ClaudeSnapshotResponse.class)
-                            .block();
+                            .block(Duration.ofSeconds(30));
 
             if (response == null) {
                 throw new CrawlingException(CrawlingErrorStatus.CRAWLING_FAILED, "응답이 비어있습니다.");

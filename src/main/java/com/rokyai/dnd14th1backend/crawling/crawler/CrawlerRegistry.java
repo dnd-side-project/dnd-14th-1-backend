@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.rokyai.dnd14th1backend.crawling.enums.Platform;
 
-/** 입력받은 공유 URL의 플랫폼 판별 및 선택하는 registyr */
+/** 입력받은 공유 URL의 플랫폼 판별 및 선택하는 registry */
 @Component
 public class CrawlerRegistry {
 

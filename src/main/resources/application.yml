@@ -38,4 +38,4 @@ cors:
 
 app:
   security:
-    enabled: ${SECURITY_ENABLED:false}  # 프로덕션에서 true로 설정
+    enabled: ${SECURITY_ENABLED:true}  # 로컬 개발 시 false로 설정

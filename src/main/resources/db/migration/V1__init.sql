@@ -20,7 +20,7 @@ CREATE TABLE user_identities (
 
 CREATE TABLE crawling_tasks (
     id UUID PRIMARY KEY,
-    user_id UUID,
+    user_id UUID REFERENCES users(id),
     source_url VARCHAR(2048) NOT NULL,
     platform VARCHAR(50) NOT NULL,
     status VARCHAR(20) NOT NULL,
@@ -31,8 +31,8 @@ CREATE TABLE crawling_tasks (
 
 CREATE TABLE conversations (
     id UUID PRIMARY KEY,
-    crawling_task_id UUID,
-    user_id UUID,
+    crawling_task_id UUID REFERENCES crawling_tasks(id),
+    user_id UUID REFERENCES users(id),
     title VARCHAR(500),
     source_url VARCHAR(2048),
     platform VARCHAR(50),
