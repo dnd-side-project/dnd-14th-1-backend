@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.rokyai.dnd14th1backend.auth.filter.JwtAuthenticationEntryPoint;
 import com.rokyai.dnd14th1backend.auth.filter.JwtAuthenticationFilter;
 
 /** Spring Security 설정 */
@@ -23,12 +24,15 @@ import com.rokyai.dnd14th1backend.auth.filter.JwtAuthenticationFilter;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final String allowedOrigins;
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
+            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
             @Value("${cors.allowed-origins:http://localhost:3000}") String allowedOrigins) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.allowedOrigins = allowedOrigins;
     }
 
@@ -57,6 +61,7 @@ public class SecurityConfig {
                                         .authenticated()
                                         .anyRequest()
                                         .permitAll())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .addFilterBefore(
                         jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
