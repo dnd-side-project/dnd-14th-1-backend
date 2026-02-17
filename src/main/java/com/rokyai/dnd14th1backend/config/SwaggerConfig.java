@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.HandlerMethod;
@@ -26,6 +27,9 @@ import com.rokyai.dnd14th1backend.common.response.SkipApiResponseWrapper;
 /** Swagger/OpenAPI 설정. 공통 응답 스키마를 항상 노출하여 API 문서의 일관성 보장. */
 @Configuration
 public class SwaggerConfig {
+
+    @Value("${springdoc.swagger-server-url}")
+    private String swaggerServerUrl;
 
     /** ApiResponse 스키마 캐시. 빈 초기화 시 한 번만 로드하여 모든 API 오퍼레이션에서 재사용. */
     private final Schema<?> cachedApiResponseBaseSchema;
@@ -50,7 +54,7 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
         Server server = new Server();
-        server.setUrl("http://localhost:8080");
+        server.setUrl(swaggerServerUrl);
 
         return new OpenAPI()
                 .info(apiInfo())

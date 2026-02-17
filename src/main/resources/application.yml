@@ -24,6 +24,7 @@ server:
 springdoc:
   api-docs:
     version: "OPENAPI_3_0"
+  swagger-server-url: ${SWAGGER_SERVER_URL:http://localhost:8080}
 
 jwt:
   secret-key: ${JWT_SECRET_KEY:your-secret-key-change-in-production}
