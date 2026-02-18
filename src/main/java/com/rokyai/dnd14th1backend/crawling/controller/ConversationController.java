@@ -5,11 +5,11 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,7 +73,7 @@ public class ConversationController {
             })
     public ResponseEntity<ConversationResponse> createConversation(
             @Valid @RequestBody CreateConversationRequest request,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         ConversationResponse response =
                 conversationService.createConversation(userId, request.title());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -92,7 +92,7 @@ public class ConversationController {
                 @ApiResponse(responseCode = "200", description = "조회 성공"),
             })
     public ResponseEntity<List<ConversationResponse>> getConversations(
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         List<ConversationResponse> responses = conversationService.getConversations(userId);
         return ResponseEntity.ok(responses);
     }
@@ -122,7 +122,7 @@ public class ConversationController {
             })
     public ResponseEntity<ConversationResponse> getConversation(
             @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         ConversationResponse response = conversationService.getConversation(userId, conversationId);
         return ResponseEntity.ok(response);
     }
@@ -143,7 +143,7 @@ public class ConversationController {
             })
     public ResponseEntity<Void> deleteConversation(
             @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         conversationService.deleteConversation(userId, conversationId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -172,7 +172,7 @@ public class ConversationController {
     public ResponseEntity<ChatResponse> createChat(
             @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
             @Valid @RequestBody CreateChatRequest request,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         ChatResponse response =
                 conversationService.createChat(
                         userId, conversationId, request.userContent(), request.assistantContent());
@@ -201,7 +201,7 @@ public class ConversationController {
             })
     public ResponseEntity<ChatListResponse> getChats(
             @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         ChatListResponse response = conversationService.getChats(userId, conversationId);
         return ResponseEntity.ok(response);
     }
@@ -230,7 +230,7 @@ public class ConversationController {
     public ResponseEntity<ChatResponse> getChat(
             @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
             @Parameter(description = "Chat ID") @PathVariable UUID chatId,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         ChatResponse response = conversationService.getChat(userId, conversationId, chatId);
         return ResponseEntity.ok(response);
     }
@@ -253,7 +253,7 @@ public class ConversationController {
     public ResponseEntity<Void> deleteChat(
             @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
             @Parameter(description = "Chat ID") @PathVariable UUID chatId,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         conversationService.deleteChat(userId, conversationId, chatId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -288,7 +288,7 @@ public class ConversationController {
             @Parameter(description = "대화 ID") @PathVariable UUID conversationId,
             @Parameter(description = "Chat ID") @PathVariable UUID chatId,
             @Valid @RequestBody OptimizeChatRequest request,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         OptimizeChatResponse response =
                 userGameService.optimizeChat(userId, conversationId, chatId, request.tokenSaving());
         return ResponseEntity.ok(response);

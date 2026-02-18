@@ -5,10 +5,10 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,8 +66,7 @@ public class CrawlingController {
                 @ApiResponse(responseCode = "500", description = "서버 오류"),
             })
     public ResponseEntity<CrawlingResponse> requestCrawling(
-            @Valid @RequestBody CrawlingRequest request,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @Valid @RequestBody CrawlingRequest request, @AuthenticationPrincipal UUID userId) {
         CrawlingResponse response = crawlingService.requestCrawling(request.url(), userId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -97,7 +96,7 @@ public class CrawlingController {
             })
     public ResponseEntity<CrawlingStatusResponse> getStatus(
             @Parameter(description = "작업 ID") @PathVariable UUID taskId,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         CrawlingStatusResponse response = crawlingService.getStatus(taskId, userId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -128,7 +127,7 @@ public class CrawlingController {
             })
     public ResponseEntity<ConversationResponse> getResult(
             @Parameter(description = "작업 ID") @PathVariable UUID taskId,
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         ConversationResponse response = crawlingService.getResult(taskId, userId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -146,7 +145,7 @@ public class CrawlingController {
                 @ApiResponse(responseCode = "200", description = "목록 조회 성공"),
             })
     public ResponseEntity<List<CrawlingTaskSummary>> getMyTasks(
-            @Parameter(hidden = true) @RequestAttribute("userId") UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         List<CrawlingTaskSummary> tasks = crawlingService.getTasksByUser(userId);
         return ResponseEntity.status(HttpStatus.OK).body(tasks);
     }
