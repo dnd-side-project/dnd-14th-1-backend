@@ -14,9 +14,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 
-import com.rokyai.dnd14th1backend.auth.exception.AuthException;
 import com.rokyai.dnd14th1backend.auth.exception.AuthStatus;
 import com.rokyai.dnd14th1backend.auth.provider.JwtTokenProvider;
 
@@ -24,6 +25,8 @@ import com.rokyai.dnd14th1backend.auth.provider.JwtTokenProvider;
 @Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    public static final String AUTH_EXCEPTION_STATUS_ATTRIBUTE = "AUTH_EXCEPTION_STATUS";
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
@@ -50,13 +53,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = extractToken(request);
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            String userIdStr = jwtTokenProvider.extractUserId(token);
+        if (token != null) {
             try {
+                String userIdStr = jwtTokenProvider.extractUserId(token);
                 UUID userId = UUID.fromString(userIdStr);
                 setAuthentication(userId);
+            } catch (ExpiredJwtException e) {
+                request.setAttribute(AUTH_EXCEPTION_STATUS_ATTRIBUTE, AuthStatus.EXPIRED_TOKEN);
+                log.warn("JWT 토큰이 만료되었습니다: {}", e.getMessage());
+            } catch (JwtException e) {
+                request.setAttribute(
+                        AUTH_EXCEPTION_STATUS_ATTRIBUTE, AuthStatus.INVALID_ACCESS_TOKEN);
+                log.warn("JWT 토큰 검증에 실패했습니다: {}", e.getMessage());
             } catch (IllegalArgumentException e) {
-                throw new AuthException(AuthStatus.INVALID_OAUTH_REQUEST, "잘못된 사용자 ID 형식입니다");
+                request.setAttribute(
+                        AUTH_EXCEPTION_STATUS_ATTRIBUTE, AuthStatus.INVALID_ACCESS_TOKEN);
+                log.warn("잘못된 사용자 ID 형식입니다: {}", e.getMessage());
             }
         }
 

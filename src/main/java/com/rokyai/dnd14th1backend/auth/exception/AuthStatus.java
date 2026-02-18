@@ -17,9 +17,10 @@ public enum AuthStatus implements StatusInterface {
     INVALID_REFRESH_TOKEN(401, 1402, "유효하지 않은 Refresh Token입니다"),
     EXPIRED_TOKEN(401, 1403, "만료된 토큰입니다"),
     INVALID_ISSUER(401, 1404, "유효하지 않은 issuer입니다"),
+    INVALID_ACCESS_TOKEN(401, 1405, "유효하지 않은 액세스 토큰입니다"),
 
-    // 권한 없음 (1405)
-    INVALID_AUDIENCE(403, 1405, "유효하지 않은 audience입니다");
+    // 권한 없음 (1406)
+    INVALID_AUDIENCE(403, 1406, "유효하지 않은 audience입니다");
 
     private final int httpStatusCode;
     private final int customStatusCode;
