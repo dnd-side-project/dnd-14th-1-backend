@@ -24,6 +24,8 @@ services:
       dockerfile: Dockerfile
     container_name: dnd-app
     restart: unless-stopped
+    ports:
+      - "8080:8080"
     env_file:
       - .env
     environment:
