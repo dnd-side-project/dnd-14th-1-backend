@@ -17,3 +17,59 @@ CREATE TABLE user_identities (
     updated_at TIMESTAMP NOT NULL,
     CONSTRAINT fk_user_identities_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+
+CREATE TABLE crawling_tasks (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES users(id),
+    source_url VARCHAR(2048) NOT NULL,
+    platform VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    error_message TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE conversations (
+    id UUID PRIMARY KEY,
+    crawling_task_id UUID REFERENCES crawling_tasks(id),
+    user_id UUID REFERENCES users(id),
+    title VARCHAR(500),
+    source_url VARCHAR(2048),
+    platform VARCHAR(50),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE messages (
+    id UUID PRIMARY KEY,
+    conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    role VARCHAR(20) NOT NULL,
+    content TEXT NOT NULL,
+    sequence INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE chats (
+    id UUID PRIMARY KEY,
+    conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    user_content TEXT NOT NULL,
+    assistant_content TEXT,
+    sequence INTEGER NOT NULL,
+    token_saving INTEGER,
+    xp_earned INTEGER,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_chats_conversation_sequence UNIQUE (conversation_id, sequence)
+);
+
+CREATE TABLE user_game_profiles (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL UNIQUE REFERENCES users(id),
+    total_xp BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX idx_chats_conversation_id ON chats(conversation_id);

@@ -1,0 +1,29 @@
+name: CD - Deploy to Server
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEV_SSH_HOST }}
+          username: ${{ secrets.DEV_SSH_USER }}
+          key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.DEV_SSH_PORT }}
+          envs: ENV
+          script: |
+            cd /home/ubuntu/dnd-14th-1-backend
+            git pull
+            echo "$ENV" > .env
+            docker compose build app && docker compose up -d
+        env:
+          ENV: ${{ secrets.ENV }}

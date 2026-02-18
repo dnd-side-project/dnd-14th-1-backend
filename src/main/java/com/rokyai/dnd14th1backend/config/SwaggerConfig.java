@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.HandlerMethod;
@@ -16,8 +17,9 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 
 import com.rokyai.dnd14th1backend.common.response.ApiExceptionResponse;
@@ -26,6 +28,11 @@ import com.rokyai.dnd14th1backend.common.response.SkipApiResponseWrapper;
 /** Swagger/OpenAPI 설정. 공통 응답 스키마를 항상 노출하여 API 문서의 일관성 보장. */
 @Configuration
 public class SwaggerConfig {
+
+    private static final String SECURITY_SCHEME_NAME = "Bearer Authentication";
+
+    @Value("${springdoc.swagger-server-url}")
+    private String swaggerServerUrl;
 
     /** ApiResponse 스키마 캐시. 빈 초기화 시 한 번만 로드하여 모든 API 오퍼레이션에서 재사용. */
     private final Schema<?> cachedApiResponseBaseSchema;
@@ -39,33 +46,51 @@ public class SwaggerConfig {
         Map<String, Schema<?>> apiResponseSchemas =
                 (Map<String, Schema<?>>)
                         (Map<?, ?>) ModelConverters.getInstance().readAll(apiResponseClass);
-        this.cachedApiResponseBaseSchema = apiResponseSchemas.get(apiResponseClass.getSimpleName());
+        this.cachedApiResponseBaseSchema =
+                findSchemaByName(apiResponseSchemas, apiResponseClass.getSimpleName());
 
+        @SuppressWarnings("rawtypes")
         Map<String, Schema> exceptionSchemas =
                 ModelConverters.getInstance().readAll(ApiExceptionResponse.class);
         this.cachedApiExceptionResponseSchema =
-                exceptionSchemas.get(ApiExceptionResponse.class.getSimpleName());
+                findSchemaByName(exceptionSchemas, ApiExceptionResponse.class.getSimpleName());
+    }
+
+    /**
+     * 스키마 맵에서 지정된 이름으로 스키마를 찾고, 없으면 첫 번째 항목을 반환. 제네릭 타입은 ModelConverters가 다른 키 이름을 생성할 수 있으므로 대체 탐색
+     * 수행.
+     *
+     * @param schemas 스키마 맵
+     * @param expectedName 기대하는 스키마 이름
+     * @return 매칭된 스키마 (없으면 null)
+     */
+    private static <S> S findSchemaByName(Map<String, S> schemas, String expectedName) {
+        if (schemas == null || schemas.isEmpty()) {
+            return null;
+        }
+        S schema = schemas.get(expectedName);
+        if (schema != null) {
+            return schema;
+        }
+        return schemas.values().iterator().next();
     }
 
     @Bean
     public OpenAPI openAPI() {
         Server server = new Server();
-        server.setUrl("http://localhost:8080");
+        server.setUrl(swaggerServerUrl);
 
         return new OpenAPI()
                 .info(apiInfo())
-                //                .addSecurityItem(
-                //                        new SecurityRequirement().addList(SECURITY_SCHEME_NAME))
-                //                .components(
-                //                        new Components()
-                //                                .addSecuritySchemes(
-                //                                        SECURITY_SCHEME_NAME,
-                //                                        new SecurityScheme()
-                //                                                .name(SECURITY_SCHEME_NAME)
-                //                                                .type(SecurityScheme.Type.HTTP)
-                //                                                .scheme("bearer")
-                //                                                .bearerFormat("JWT")
-                //                                        ))
+                .components(
+                        new io.swagger.v3.oas.models.Components()
+                                .addSecuritySchemes(
+                                        SECURITY_SCHEME_NAME,
+                                        new SecurityScheme()
+                                                .name(SECURITY_SCHEME_NAME)
+                                                .type(SecurityScheme.Type.HTTP)
+                                                .scheme("bearer")
+                                                .bearerFormat("JWT")))
                 .servers(List.of(server));
     }
 
@@ -89,7 +114,27 @@ public class SwaggerConfig {
         };
     }
 
-    /** 모든 API 응답을 ApiResponse 래퍼로 감싸는 커스터마이저. */
+    /** /api/** 경로에 JWT 인증 요구사항을 자동 적용하는 커스터마이저. /open-api/** 경로는 인증 불필요. */
+    @Bean
+    public OpenApiCustomizer securityRequirementCustomizer() {
+        return openApi -> {
+            openApi.getPaths()
+                    .forEach(
+                            (path, pathItem) -> {
+                                if (path.startsWith("/api/")) {
+                                    pathItem.readOperations()
+                                            .forEach(
+                                                    operation ->
+                                                            operation.addSecurityItem(
+                                                                    new SecurityRequirement()
+                                                                            .addList(
+                                                                                    SECURITY_SCHEME_NAME)));
+                                }
+                            });
+        };
+    }
+
+    /** 모든 API의 2xx 성공 응답을 ApiResponse 래퍼로 감싸는 커스터마이저. */
     @Bean
     public OperationCustomizer apiResponseWrapperCustomizer() {
         return (Operation operation, HandlerMethod handlerMethod) -> {
@@ -106,24 +151,29 @@ public class SwaggerConfig {
                 return operation;
             }
 
-            // 200 응답을 ApiResponse로 래핑
-            ApiResponse successResponse = responses.get("200");
-            if (successResponse != null && successResponse.getContent() != null) {
-                Content content = successResponse.getContent();
-                MediaType mediaType = content.get("application/json");
-                if (mediaType == null) {
-                    mediaType = content.get("*/*");
-                }
-
-                if (mediaType != null && mediaType.getSchema() != null) {
-                    Schema<?> originalSchema = mediaType.getSchema();
-                    Schema<?> wrappedSchema = wrapWithApiResponse(originalSchema);
-                    mediaType.setSchema(wrappedSchema);
-                }
-            }
+            // 모든 2xx 성공 응답을 ApiResponse로 래핑
+            responses.forEach(
+                    (statusCode, response) -> {
+                        if (statusCode.startsWith("2") && response.getContent() != null) {
+                            wrapSuccessResponseContent(response.getContent());
+                        }
+                    });
 
             return operation;
         };
+    }
+
+    /** 성공 응답의 Content에서 JSON 스키마를 찾아 ApiResponse 래퍼로 감싼다. */
+    private void wrapSuccessResponseContent(Content content) {
+        MediaType mediaType = content.get("application/json");
+        if (mediaType == null) {
+            mediaType = content.get("*/*");
+        }
+
+        if (mediaType != null && mediaType.getSchema() != null) {
+            Schema<?> originalSchema = mediaType.getSchema();
+            mediaType.setSchema(wrapWithApiResponse(originalSchema));
+        }
     }
 
     /** 캐싱된 ApiResponse 스키마를 기반으로 원본 데이터 스키마를 래핑하여 반환. */
