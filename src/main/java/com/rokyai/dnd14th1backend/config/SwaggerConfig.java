@@ -19,6 +19,8 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 
 import com.rokyai.dnd14th1backend.common.response.ApiExceptionResponse;
@@ -56,20 +58,19 @@ public class SwaggerConfig {
         Server server = new Server();
         server.setUrl(swaggerServerUrl);
 
+        String securitySchemeName = "Bearer Authentication";
+
         return new OpenAPI()
                 .info(apiInfo())
-                //                .addSecurityItem(
-                //                        new SecurityRequirement().addList(SECURITY_SCHEME_NAME))
-                //                .components(
-                //                        new Components()
-                //                                .addSecuritySchemes(
-                //                                        SECURITY_SCHEME_NAME,
-                //                                        new SecurityScheme()
-                //                                                .name(SECURITY_SCHEME_NAME)
-                //                                                .type(SecurityScheme.Type.HTTP)
-                //                                                .scheme("bearer")
-                //                                                .bearerFormat("JWT")
-                //                                        ))
+                .components(
+                        new io.swagger.v3.oas.models.Components()
+                                .addSecuritySchemes(
+                                        securitySchemeName,
+                                        new SecurityScheme()
+                                                .name(securitySchemeName)
+                                                .type(SecurityScheme.Type.HTTP)
+                                                .scheme("bearer")
+                                                .bearerFormat("JWT")))
                 .servers(List.of(server));
     }
 
@@ -90,6 +91,27 @@ public class SwaggerConfig {
                     cachedApiResponseBaseSchema);
             schemas.put(
                     ApiExceptionResponse.class.getSimpleName(), cachedApiExceptionResponseSchema);
+        };
+    }
+
+    /** /api/** 경로에 JWT 인증 요구사항을 자동 적용하는 커스터마이저. /open-api/** 경로는 인증 불필요. */
+    @Bean
+    public OpenApiCustomizer securityRequirementCustomizer() {
+        String securitySchemeName = "Bearer Authentication";
+        return openApi -> {
+            openApi.getPaths()
+                    .forEach(
+                            (path, pathItem) -> {
+                                if (path.startsWith("/api/")) {
+                                    pathItem.readOperations()
+                                            .forEach(
+                                                    operation ->
+                                                            operation.addSecurityItem(
+                                                                    new SecurityRequirement()
+                                                                            .addList(
+                                                                                    securitySchemeName)));
+                                }
+                            });
         };
     }
 
