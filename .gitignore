@@ -36,12 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 **/conf/ssl/
-.agent
-.claude
-.gemini
-.github/prompts
-.claude/
-.gemini/
 
 ### Docker / SSL ###
 certbot/conf/
@@ -50,3 +44,4 @@ nginx/ssl/ssl-dhparams.pem
 
 ### environments ###
 .env
+.DS_Store

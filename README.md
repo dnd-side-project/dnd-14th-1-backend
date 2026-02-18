@@ -232,6 +232,7 @@ public ResponseEntity<Resource> downloadFile() { ... }
 | 1000~1999 | Auth 도메인 |
 | 2000~2999 | Order 도메인 |
 | 3000~3999 | User 도메인 |
+| 4000~4999 | Badge 도메인 |
 | 9000~9999 | 서버 에러 |
 
 ### 기본 상태 코드 (DefaultStatus)
