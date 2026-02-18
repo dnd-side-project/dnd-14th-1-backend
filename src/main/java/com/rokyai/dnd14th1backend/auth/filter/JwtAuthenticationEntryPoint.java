@@ -31,7 +31,13 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException authException)
             throws IOException {
-        AuthStatus status = AuthStatus.EXPIRED_TOKEN;
+        AuthStatus status =
+                (AuthStatus)
+                        request.getAttribute(
+                                JwtAuthenticationFilter.AUTH_EXCEPTION_STATUS_ATTRIBUTE);
+        if (status == null) {
+            status = AuthStatus.EXPIRED_TOKEN;
+        }
 
         response.setStatus(status.getHttpStatusCode());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
