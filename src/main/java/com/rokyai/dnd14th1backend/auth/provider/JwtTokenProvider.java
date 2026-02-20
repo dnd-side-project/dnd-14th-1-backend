@@ -26,11 +26,15 @@ public class JwtTokenProvider {
         this.expirationTime = expirationTime;
     }
 
+    private static final String TOKEN_TYPE_CLAIM = "type";
+    private static final String TOKEN_TYPE_ACCESS = "access";
+    private static final String TOKEN_TYPE_REFRESH = "refresh";
+
     /**
      * JWT 액세스 토큰을 생성합니다.
      *
      * @param userId 사용자 ID
-     * @return JWT 토큰
+     * @return JWT 액세스 토큰
      */
     public String generateAccessToken(String userId) {
         Date now = new Date();
@@ -38,6 +42,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .subject(userId)
+                .claim(TOKEN_TYPE_CLAIM, TOKEN_TYPE_ACCESS)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
@@ -52,10 +57,11 @@ public class JwtTokenProvider {
      */
     public String generateRefreshToken(String userId) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expirationTime * 7); // 액세스 토큰의 7배 유효기간
+        Date expiryDate = new Date(now.getTime() + expirationTime * 7);
 
         return Jwts.builder()
                 .subject(userId)
+                .claim(TOKEN_TYPE_CLAIM, TOKEN_TYPE_REFRESH)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
@@ -71,6 +77,38 @@ public class JwtTokenProvider {
     public String extractUserId(String token) {
         Claims claims = parseToken(token);
         return claims.getSubject();
+    }
+
+    /**
+     * JWT 토큰에서 토큰 타입을 추출합니다.
+     *
+     * @param token JWT 토큰
+     * @return 토큰 타입 ("access" 또는 "refresh")
+     */
+    public String extractTokenType(String token) {
+        Claims claims = parseToken(token);
+        return claims.get(TOKEN_TYPE_CLAIM, String.class);
+    }
+
+    /**
+     * JWT 토큰이 액세스 토큰인지 검증합니다.
+     *
+     * @param token JWT 토큰
+     * @return 액세스 토큰 여부
+     */
+    public boolean isAccessToken(String token) {
+        return TOKEN_TYPE_ACCESS.equals(extractTokenType(token));
+    }
+
+    /**
+     * JWT 리프레시 토큰을 검증합니다. 서명, 만료, 토큰 타입을 모두 확인합니다.
+     *
+     * @param token JWT 토큰
+     * @return 유효한 리프레시 토큰 여부
+     */
+    public boolean isValidRefreshToken(String token) {
+        Claims claims = parseToken(token);
+        return TOKEN_TYPE_REFRESH.equals(claims.get(TOKEN_TYPE_CLAIM, String.class));
     }
 
     /**
