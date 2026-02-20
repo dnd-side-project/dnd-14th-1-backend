@@ -29,6 +29,7 @@ public class JwtTokenProvider {
     private static final String TOKEN_TYPE_CLAIM = "type";
     private static final String TOKEN_TYPE_ACCESS = "access";
     private static final String TOKEN_TYPE_REFRESH = "refresh";
+    private static final long REFRESH_TOKEN_EXPIRATION_MULTIPLIER = 7L;
 
     /**
      * JWT 액세스 토큰을 생성합니다.
@@ -57,7 +58,8 @@ public class JwtTokenProvider {
      */
     public String generateRefreshToken(String userId) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expirationTime * 7);
+        Date expiryDate =
+                new Date(now.getTime() + expirationTime * REFRESH_TOKEN_EXPIRATION_MULTIPLIER);
 
         return Jwts.builder()
                 .subject(userId)
