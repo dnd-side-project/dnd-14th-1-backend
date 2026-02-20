@@ -55,9 +55,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractToken(request);
         if (token != null) {
             try {
-                String userIdStr = jwtTokenProvider.extractUserId(token);
-                UUID userId = UUID.fromString(userIdStr);
-                setAuthentication(userId);
+                if (!jwtTokenProvider.isAccessToken(token)) {
+                    request.setAttribute(
+                            AUTH_EXCEPTION_STATUS_ATTRIBUTE, AuthStatus.INVALID_ACCESS_TOKEN);
+                    log.warn("액세스 토큰이 아닌 토큰으로 API 접근을 시도했습니다");
+                } else {
+                    String userIdStr = jwtTokenProvider.extractUserId(token);
+                    UUID userId = UUID.fromString(userIdStr);
+                    setAuthentication(userId);
+                }
             } catch (ExpiredJwtException e) {
                 request.setAttribute(AUTH_EXCEPTION_STATUS_ATTRIBUTE, AuthStatus.EXPIRED_TOKEN);
                 log.warn("JWT 토큰이 만료되었습니다: {}", e.getMessage());
