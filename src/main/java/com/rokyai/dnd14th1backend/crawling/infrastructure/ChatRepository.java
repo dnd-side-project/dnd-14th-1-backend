@@ -44,4 +44,13 @@ public interface ChatRepository extends JpaRepository<Chat, UUID> {
     @Query(
             "SELECT COALESCE(MAX(c.sequence), 0) FROM Chat c WHERE c.conversation.id = :conversationId")
     int findMaxSequenceByConversationId(@Param("conversationId") UUID conversationId);
+
+    /**
+     * 유저의 누적 채팅 최적화 횟수 조회.
+     *
+     * @param userId 사용자 ID
+     * @return 최적화 완료된 Chat 수
+     */
+    @Query("SELECT COUNT(c) FROM Chat c WHERE c.conversation.userId = :userId AND c.xpEarned IS NOT NULL")
+    long countOptimizedByUserId(@Param("userId") UUID userId);
 }

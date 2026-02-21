@@ -32,4 +32,13 @@ public interface CrawlingTaskRepository extends JpaRepository<CrawlingTask, UUID
      * @return 크롤링 작업 (Optional)
      */
     Optional<CrawlingTask> findByIdAndUserId(UUID id, UUID userId);
+
+    /**
+     * 유저의 누적 크롤링 요청 횟수 조회.
+     *
+     * @param userId 사용자 ID
+     * @return 크롤링 작업 수 (상태 무관)
+     */
+    @Query("SELECT COUNT(t) FROM CrawlingTask t WHERE t.userId = :userId")
+    long countByUserId(@Param("userId") UUID userId);
 }
