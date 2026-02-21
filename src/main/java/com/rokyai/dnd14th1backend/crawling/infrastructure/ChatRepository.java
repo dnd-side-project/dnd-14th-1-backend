@@ -51,6 +51,7 @@ public interface ChatRepository extends JpaRepository<Chat, UUID> {
      * @param userId 사용자 ID
      * @return 최적화 완료된 Chat 수
      */
-    @Query("SELECT COUNT(c) FROM Chat c WHERE c.conversation.userId = :userId AND c.xpEarned IS NOT NULL")
+    @Query(
+            "SELECT COUNT(c) FROM Chat c WHERE c.conversation.userId = :userId AND c.xpEarned IS NOT NULL")
     long countOptimizedByUserId(@Param("userId") UUID userId);
 }
