@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class BadgeEventService {
      * @param optimizeCount chat.applyOptimization() 이후 조회한 누적 최적화 횟수
      * @return 새로 획득한 배지 목록 (없으면 빈 List)
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<EarnedBadgeInfo> checkBadgesOnOptimize(
             UUID userId, int tokenSaving, long totalXp, long optimizeCount) {
         Set<UUID> earnedBadgeIds = userBadgeRepository.findBadgeIdsByUserId(userId);

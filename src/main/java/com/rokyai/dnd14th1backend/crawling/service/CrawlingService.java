@@ -72,11 +72,17 @@ public class CrawlingService {
 
         CrawlingTask task = CrawlingTask.create(url, platform, userId);
         crawlingTaskRepository.save(task);
-        long crawlingCount = crawlingTaskRepository.countByUserId(userId);
-        List<EarnedBadgeInfo> earnedBadges =
-                badgeEventService.checkBadgesOnCrawl(userId, crawlingCount);
 
         CompletableFuture<Conversation> future = crawlingExecutor.executeAsync(task);
+
+        long crawlingCount = crawlingTaskRepository.countByUserId(userId);
+        List<EarnedBadgeInfo> earnedBadges;
+        try {
+            earnedBadges = badgeEventService.checkBadgesOnCrawl(userId, crawlingCount);
+        } catch (Exception e) {
+            log.warn("배지 체크 중 오류 발생, 무시: userId={}, error={}", userId, e.getMessage());
+            earnedBadges = List.of();
+        }
 
         try {
             // 2초 대기
