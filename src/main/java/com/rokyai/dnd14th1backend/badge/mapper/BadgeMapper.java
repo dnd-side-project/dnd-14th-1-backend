@@ -14,6 +14,7 @@ public final class BadgeMapper {
                 badge.getName(),
                 badge.getDescription(),
                 badge.getTier(),
+                badge.getTriggerType(),
                 badge.getTriggerCondition(),
                 badge.getEnableImageUrl(),
                 badge.getDisableImageUrl());
