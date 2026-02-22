@@ -119,11 +119,11 @@ public class UserGameService {
         return 1;
     }
 
-    private long requiredXp(int tier) {
+    public long requiredXp(int tier) {
         return (long) (2000 * Math.pow(tier - 1, 2.1));
     }
 
-    private double calculateProgress(long totalXp, int tier) {
+    public double calculateProgress(long totalXp, int tier) {
         if (tier >= MAX_TIER) {
             return 1.0;
         }
