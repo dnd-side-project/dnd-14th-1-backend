@@ -11,7 +11,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -20,6 +23,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import com.rokyai.dnd14th1backend.badge.entity.UserBadge;
 import com.rokyai.dnd14th1backend.common.util.UuidV7;
 
 /** 사용자. */
@@ -47,6 +51,10 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "representative_user_badge_id")
+    private UserBadge representativeUserBadge;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<UserIdentity> identities = new ArrayList<>();
@@ -59,5 +67,14 @@ public class User {
      */
     public static User create(String email) {
         return User.builder().email(email).build();
+    }
+
+    /**
+     * 대표 배지를 설정합니다.
+     *
+     * @param userBadge 대표로 설정할 유저-배지 연관 엔티티
+     */
+    public void updateRepresentativeUserBadge(UserBadge userBadge) {
+        this.representativeUserBadge = userBadge;
     }
 }

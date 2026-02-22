@@ -95,10 +95,16 @@ public class BadgeEventService {
         return newlyEarned;
     }
 
+    /** 배지를 부여하고, 대표 배지가 없으면 자동으로 대표 배지로 설정합니다. */
     private EarnedBadgeInfo grantBadge(User user, Badge badge) {
         UserBadge userBadge =
                 UserBadge.builder().user(user).badge(badge).earnedAt(LocalDateTime.now()).build();
         userBadgeRepository.save(userBadge);
+
+        if (user.getRepresentativeUserBadge() == null) {
+            user.updateRepresentativeUserBadge(userBadge);
+        }
+
         return BadgeMapper.toEarnedBadgeInfo(userBadge);
     }
 }

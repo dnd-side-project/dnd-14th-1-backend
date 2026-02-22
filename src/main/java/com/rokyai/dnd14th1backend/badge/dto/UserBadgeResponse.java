@@ -19,4 +19,5 @@ public record UserBadgeResponse(
         @Schema(description = "달성 조건 값") Integer triggerCondition,
         @Schema(description = "활성 이미지 URL") String enableImageUrl,
         @Schema(description = "비활성 이미지 URL") String disableImageUrl,
-        @Schema(description = "획득 일시") LocalDateTime earnedAt) {}
+        @Schema(description = "획득 일시") LocalDateTime earnedAt,
+        @Schema(description = "대표 배지 여부") boolean isRepresentative) {}

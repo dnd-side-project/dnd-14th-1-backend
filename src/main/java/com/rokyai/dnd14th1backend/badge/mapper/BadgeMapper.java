@@ -1,5 +1,7 @@
 package com.rokyai.dnd14th1backend.badge.mapper;
 
+import java.util.UUID;
+
 import com.rokyai.dnd14th1backend.badge.dto.BadgeResponse;
 import com.rokyai.dnd14th1backend.badge.dto.EarnedBadgeInfo;
 import com.rokyai.dnd14th1backend.badge.dto.UserBadgeResponse;
@@ -24,8 +26,14 @@ public final class BadgeMapper {
                 badge.getDisableImageUrl());
     }
 
-    /** UserBadge → UserBadgeResponse (유저 보유 배지 목록 조회용). */
-    public static UserBadgeResponse toUserBadgeResponse(UserBadge userBadge) {
+    /**
+     * UserBadge → UserBadgeResponse (유저 보유 배지 목록 조회용).
+     *
+     * @param userBadge 유저-배지 연관 엔티티
+     * @param representativeUserBadgeId 사용자의 대표 유저-배지 ID (없으면 null)
+     */
+    public static UserBadgeResponse toUserBadgeResponse(
+            UserBadge userBadge, UUID representativeUserBadgeId) {
         Badge badge = userBadge.getBadge();
         return new UserBadgeResponse(
                 badge.getId(),
@@ -36,7 +44,8 @@ public final class BadgeMapper {
                 badge.getTriggerCondition(),
                 badge.getEnableImageUrl(),
                 badge.getDisableImageUrl(),
-                userBadge.getEarnedAt());
+                userBadge.getEarnedAt(),
+                userBadge.getId().equals(representativeUserBadgeId));
     }
 
     /** UserBadge → EarnedBadgeInfo (API 응답 임베딩용). */
