@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import com.rokyai.dnd14th1backend.badge.BadgeTier;
+import com.rokyai.dnd14th1backend.badge.BadgeTriggerType;
 import com.rokyai.dnd14th1backend.common.util.UuidV7;
 
 /** 배지. */
@@ -44,6 +45,10 @@ public class Badge {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BadgeTier tier;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BadgeTriggerType triggerType;
 
     @Column(nullable = false)
     private Integer triggerCondition;

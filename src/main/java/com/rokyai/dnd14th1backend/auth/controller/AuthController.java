@@ -69,7 +69,9 @@ public class AuthController {
      * @return 새로운 액세스 토큰과 리프레시 토큰
      */
     @PostMapping("/refresh")
-    @Operation(summary = "토큰 재발급", description = "Refresh Token으로 새로운 Access Token과 Refresh Token을 재발급합니다")
+    @Operation(
+            summary = "토큰 재발급",
+            description = "Refresh Token으로 새로운 Access Token과 Refresh Token을 재발급합니다")
     @ApiResponses(
             value = {
                 @ApiResponse(
@@ -82,9 +84,7 @@ public class AuthController {
                                                 @Schema(
                                                         implementation =
                                                                 TokenRefreshResponse.class))),
-                @ApiResponse(
-                        responseCode = "401",
-                        description = "유효하지 않은 Refresh Token 또는 만료된 토큰"),
+                @ApiResponse(responseCode = "401", description = "유효하지 않은 Refresh Token 또는 만료된 토큰"),
             })
     public ResponseEntity<TokenRefreshResponse> refreshToken(
             @Valid @RequestBody RefreshTokenRequest request) {

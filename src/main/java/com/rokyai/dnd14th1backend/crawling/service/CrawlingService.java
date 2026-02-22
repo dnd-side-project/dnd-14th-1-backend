@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
+import com.rokyai.dnd14th1backend.badge.dto.EarnedBadgeInfo;
+import com.rokyai.dnd14th1backend.badge.service.BadgeEventService;
 import com.rokyai.dnd14th1backend.crawling.crawler.CrawlerRegistry;
 import com.rokyai.dnd14th1backend.crawling.domain.Conversation;
 import com.rokyai.dnd14th1backend.crawling.domain.CrawlingTask;
@@ -35,16 +37,19 @@ public class CrawlingService {
     private final ConversationRepository conversationRepository;
     private final CrawlingExecutor crawlingExecutor;
     private final CrawlerRegistry crawlerRegistry;
+    private final BadgeEventService badgeEventService;
 
     public CrawlingService(
             CrawlingTaskRepository crawlingTaskRepository,
             ConversationRepository conversationRepository,
             CrawlingExecutor crawlingExecutor,
-            CrawlerRegistry crawlerRegistry) {
+            CrawlerRegistry crawlerRegistry,
+            BadgeEventService badgeEventService) {
         this.crawlingTaskRepository = crawlingTaskRepository;
         this.conversationRepository = conversationRepository;
         this.crawlingExecutor = crawlingExecutor;
         this.crawlerRegistry = crawlerRegistry;
+        this.badgeEventService = badgeEventService;
     }
 
     /**
@@ -70,15 +75,24 @@ public class CrawlingService {
 
         CompletableFuture<Conversation> future = crawlingExecutor.executeAsync(task);
 
+        long crawlingCount = crawlingTaskRepository.countByUserId(userId);
+        List<EarnedBadgeInfo> earnedBadges;
+        try {
+            earnedBadges = badgeEventService.checkBadgesOnCrawl(userId, crawlingCount);
+        } catch (Exception e) {
+            log.warn("배지 체크 중 오류 발생, 무시: userId={}, error={}", userId, e.getMessage());
+            earnedBadges = List.of();
+        }
+
         try {
             // 2초 대기
             Conversation conversation = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
             return CrawlingResponse.completed(
-                    task.getId(), ConversationResponse.from(conversation));
+                    task.getId(), ConversationResponse.from(conversation), earnedBadges);
         } catch (TimeoutException e) {
             // 2초 초과 → 백그라운드에서 계속 진행, taskId 반환
             log.info("크롤링 타임아웃, 백그라운드 진행: taskId={}", task.getId());
-            return CrawlingResponse.inProgress(task.getId());
+            return CrawlingResponse.inProgress(task.getId(), earnedBadges);
         } catch (Exception e) {
             log.error("크롤링 요청 중 오류 발생: {}", e.getMessage(), e);
             throw new CrawlingException(CrawlingErrorStatus.CRAWLING_FAILED, e.getMessage());

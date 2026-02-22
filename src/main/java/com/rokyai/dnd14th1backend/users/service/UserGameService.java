@@ -1,10 +1,15 @@
 package com.rokyai.dnd14th1backend.users.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
+
+import com.rokyai.dnd14th1backend.badge.dto.EarnedBadgeInfo;
+import com.rokyai.dnd14th1backend.badge.service.BadgeEventService;
 import com.rokyai.dnd14th1backend.crawling.domain.Chat;
 import com.rokyai.dnd14th1backend.crawling.exception.CrawlingErrorStatus;
 import com.rokyai.dnd14th1backend.crawling.exception.CrawlingException;
@@ -18,6 +23,7 @@ import com.rokyai.dnd14th1backend.users.exception.UserGameException;
 import com.rokyai.dnd14th1backend.users.infrastructure.UserGameProfileRepository;
 
 /** 사용자 게임 서비스 (XP 적립, 티어 계산) */
+@Slf4j
 @Service
 public class UserGameService {
 
@@ -27,14 +33,17 @@ public class UserGameService {
     private final ConversationRepository conversationRepository;
     private final ChatRepository chatRepository;
     private final UserGameProfileRepository userGameProfileRepository;
+    private final BadgeEventService badgeEventService;
 
     public UserGameService(
             ConversationRepository conversationRepository,
             ChatRepository chatRepository,
-            UserGameProfileRepository userGameProfileRepository) {
+            UserGameProfileRepository userGameProfileRepository,
+            BadgeEventService badgeEventService) {
         this.conversationRepository = conversationRepository;
         this.chatRepository = chatRepository;
         this.userGameProfileRepository = userGameProfileRepository;
+        this.badgeEventService = badgeEventService;
     }
 
     @Transactional
@@ -68,10 +77,22 @@ public class UserGameService {
 
         profile.addXp(xpEarned);
 
+        long optimizeCount = chatRepository.countOptimizedByUserId(userId);
+        List<EarnedBadgeInfo> earnedBadges;
+        try {
+            earnedBadges =
+                    badgeEventService.checkBadgesOnOptimize(
+                            userId, tokenSaving, profile.getTotalXp(), optimizeCount);
+        } catch (Exception e) {
+            log.warn("배지 체크 중 오류 발생, 무시: userId={}, error={}", userId, e.getMessage());
+            earnedBadges = List.of();
+        }
+
         int tier = calculateTier(profile.getTotalXp());
         double progress = calculateProgress(profile.getTotalXp(), tier);
 
-        return new OptimizeChatResponse(xpEarned, profile.getTotalXp(), tier, progress);
+        return new OptimizeChatResponse(
+                xpEarned, profile.getTotalXp(), tier, progress, earnedBadges);
     }
 
     @Transactional(readOnly = true)
