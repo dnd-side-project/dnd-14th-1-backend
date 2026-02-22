@@ -10,7 +10,8 @@ import com.rokyai.dnd14th1backend.common.response.StatusInterface;
 @RequiredArgsConstructor
 public enum BadgeStatus implements StatusInterface {
     BADGE_NOT_FOUND(404, 4000, "배지를 찾을 수 없습니다"),
-    BADGE_ALREADY_EARNED(409, 4001, "이미 획득한 배지입니다");
+    BADGE_ALREADY_EARNED(409, 4001, "이미 획득한 배지입니다"),
+    BADGE_NOT_EARNED(400, 4002, "미획득 배지는 대표 배지로 설정할 수 없습니다");
 
     private final int httpStatusCode;
     private final int customStatusCode;
