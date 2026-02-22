@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.rokyai.dnd14th1backend.promptanalysis.domain.PromptAnalysisResult;
+import com.rokyai.dnd14th1backend.promptanalysis.dto.PromptAnalysisResultSummary;
 
 /** 프롬프트 분석 결과 리포지토리 */
 @Repository
@@ -28,34 +29,40 @@ public interface PromptAnalysisResultRepository extends JpaRepository<PromptAnal
     long countValidByUserId(@Param("userId") UUID userId);
 
     /**
-     * Cursor 기반 분석 결과 목록 조회 (첫 페이지)
+     * Cursor 기반 분석 결과 요약 목록 조회 (첫 페이지, DTO 프로젝션)
      *
      * @param userId 사용자 ID
      * @param limit 조회 개수 (size + 1)
-     * @return 분석 결과 목록 (최신순)
+     * @return 분석 결과 요약 목록 (최신순)
      */
     @Query(
-            "SELECT r FROM PromptAnalysisResult r"
+            "SELECT new com.rokyai.dnd14th1backend.promptanalysis.dto.PromptAnalysisResultSummary("
+                    + "r.id, r.estimatedTokenSaving, r.glacierMeltReductionKg, r.xpEarned,"
+                    + " r.noImprovement, r.cannotImprove, size(r.suggestions), r.createdAt)"
+                    + " FROM PromptAnalysisResult r"
                     + " WHERE r.userId = :userId"
                     + " ORDER BY r.id DESC"
                     + " LIMIT :limit")
-    List<PromptAnalysisResult> findByUserIdOrderByIdDesc(
+    List<PromptAnalysisResultSummary> findSummariesByUserIdOrderByIdDesc(
             @Param("userId") UUID userId, @Param("limit") int limit);
 
     /**
-     * Cursor 기반 분석 결과 목록 조회 (다음 페이지)
+     * Cursor 기반 분석 결과 요약 목록 조회 (다음 페이지, DTO 프로젝션)
      *
      * @param userId 사용자 ID
      * @param cursor 이전 페이지 마지막 항목 ID
      * @param limit 조회 개수 (size + 1)
-     * @return 분석 결과 목록 (최신순)
+     * @return 분석 결과 요약 목록 (최신순)
      */
     @Query(
-            "SELECT r FROM PromptAnalysisResult r"
+            "SELECT new com.rokyai.dnd14th1backend.promptanalysis.dto.PromptAnalysisResultSummary("
+                    + "r.id, r.estimatedTokenSaving, r.glacierMeltReductionKg, r.xpEarned,"
+                    + " r.noImprovement, r.cannotImprove, size(r.suggestions), r.createdAt)"
+                    + " FROM PromptAnalysisResult r"
                     + " WHERE r.userId = :userId"
                     + " AND r.id < :cursor"
                     + " ORDER BY r.id DESC"
                     + " LIMIT :limit")
-    List<PromptAnalysisResult> findByUserIdAndIdLessThanOrderByIdDesc(
+    List<PromptAnalysisResultSummary> findSummariesByUserIdAndIdLessThanOrderByIdDesc(
             @Param("userId") UUID userId, @Param("cursor") UUID cursor, @Param("limit") int limit);
 }

@@ -8,7 +8,6 @@ import com.rokyai.dnd14th1backend.promptanalysis.domain.PromptAnalysisResult;
 import com.rokyai.dnd14th1backend.promptanalysis.domain.PromptAnalysisSuggestion;
 import com.rokyai.dnd14th1backend.promptanalysis.dto.PromptAnalysisResultRequest;
 import com.rokyai.dnd14th1backend.promptanalysis.dto.PromptAnalysisResultResponse;
-import com.rokyai.dnd14th1backend.promptanalysis.dto.PromptAnalysisResultSummary;
 import com.rokyai.dnd14th1backend.promptanalysis.dto.PromptSuggestionRequest;
 
 /** PromptAnalysis Entity-DTO 변환 매퍼 */
@@ -63,19 +62,6 @@ public final class PromptAnalysisMapper {
             List<EarnedBadgeInfo> earnedBadges) {
         return new PromptAnalysisResultResponse(
                 result.getId(), result.getXpEarned(), totalXp, tier, progress, earnedBadges);
-    }
-
-    /** PromptAnalysisResult → PromptAnalysisResultSummary (목록 조회용) */
-    public static PromptAnalysisResultSummary toSummary(PromptAnalysisResult result) {
-        return new PromptAnalysisResultSummary(
-                result.getId(),
-                result.getEstimatedTokenSaving(),
-                result.getGlacierMeltReductionKg(),
-                result.getXpEarned(),
-                result.getNoImprovement(),
-                result.getCannotImprove(),
-                result.getSuggestions().size(),
-                result.getCreatedAt());
     }
 
     private static PromptAnalysisSuggestion toSuggestionEntity(PromptSuggestionRequest request) {

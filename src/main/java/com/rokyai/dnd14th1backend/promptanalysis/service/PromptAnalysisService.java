@@ -95,7 +95,7 @@ public class PromptAnalysisService {
         }
 
         int tier = userGameService.calculateTier(profile.getTotalXp());
-        double progress = calculateProgress(profile.getTotalXp(), tier);
+        double progress = userGameService.calculateProgress(profile.getTotalXp(), tier);
 
         return PromptAnalysisMapper.toResponse(
                 result, profile.getTotalXp(), tier, progress, earnedBadges);
@@ -113,35 +113,15 @@ public class PromptAnalysisService {
             UUID userId, CursorPageRequest pageRequest) {
         int fetchSize = pageRequest.size() + 1;
 
-        List<PromptAnalysisResult> fetched =
-                pageRequest.cursor() == null
-                        ? promptAnalysisResultRepository.findByUserIdOrderByIdDesc(
-                                userId, fetchSize)
-                        : promptAnalysisResultRepository.findByUserIdAndIdLessThanOrderByIdDesc(
-                                userId, pageRequest.cursor(), fetchSize);
-
         List<PromptAnalysisResultSummary> summaries =
-                fetched.stream().map(PromptAnalysisMapper::toSummary).toList();
+                pageRequest.cursor() == null
+                        ? promptAnalysisResultRepository.findSummariesByUserIdOrderByIdDesc(
+                                userId, fetchSize)
+                        : promptAnalysisResultRepository
+                                .findSummariesByUserIdAndIdLessThanOrderByIdDesc(
+                                        userId, pageRequest.cursor(), fetchSize);
 
         return CursorPageResponse.of(
                 summaries, pageRequest.size(), PromptAnalysisResultSummary::id);
-    }
-
-    private double calculateProgress(long totalXp, int tier) {
-        int maxTier = 50;
-        if (tier >= maxTier) {
-            return 1.0;
-        }
-        long currentTierXp = requiredXp(tier);
-        long nextTierXp = requiredXp(tier + 1);
-        long xpRange = nextTierXp - currentTierXp;
-        if (xpRange <= 0) {
-            return 0.0;
-        }
-        return (double) (totalXp - currentTierXp) / xpRange;
-    }
-
-    private long requiredXp(int tier) {
-        return (long) (2000 * Math.pow(tier - 1, 2.1));
     }
 }
