@@ -30,10 +30,10 @@ public final class BadgeMapper {
      * UserBadge → UserBadgeResponse (유저 보유 배지 목록 조회용).
      *
      * @param userBadge 유저-배지 연관 엔티티
-     * @param representativeBadgeId 사용자의 대표 배지 ID (없으면 null)
+     * @param representativeUserBadgeId 사용자의 대표 유저-배지 ID (없으면 null)
      */
     public static UserBadgeResponse toUserBadgeResponse(
-            UserBadge userBadge, UUID representativeBadgeId) {
+            UserBadge userBadge, UUID representativeUserBadgeId) {
         Badge badge = userBadge.getBadge();
         return new UserBadgeResponse(
                 badge.getId(),
@@ -45,7 +45,7 @@ public final class BadgeMapper {
                 badge.getEnableImageUrl(),
                 badge.getDisableImageUrl(),
                 userBadge.getEarnedAt(),
-                badge.getId().equals(representativeBadgeId));
+                userBadge.getId().equals(representativeUserBadgeId));
     }
 
     /** UserBadge → EarnedBadgeInfo (API 응답 임베딩용). */

@@ -37,13 +37,16 @@ public class BadgeService {
     /** 유저가 보유한 배지 목록을 조회합니다. */
     public List<UserBadgeResponse> getUserBadges(UUID userId) {
         User user = userRepository.getReferenceById(userId);
-        UUID representativeBadgeId =
+        UUID representativeUserBadgeId =
                 user.getRepresentativeUserBadge() != null
-                        ? user.getRepresentativeUserBadge().getBadge().getId()
+                        ? user.getRepresentativeUserBadge().getId()
                         : null;
 
         return userBadgeRepository.findByUserId(userId).stream()
-                .map(userBadge -> BadgeMapper.toUserBadgeResponse(userBadge, representativeBadgeId))
+                .map(
+                        userBadge ->
+                                BadgeMapper.toUserBadgeResponse(
+                                        userBadge, representativeUserBadgeId))
                 .toList();
     }
 
