@@ -47,7 +47,7 @@ public class TestAuthService {
                         ? request.getEmail()
                         : "test-" + UUID.randomUUID().toString().substring(0, 8) + "@test.com";
 
-        User user = User.create(email);
+        User user = User.create(email, null);
         user = userRepository.save(user);
 
         UserIdentity identity =
