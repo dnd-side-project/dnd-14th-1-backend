@@ -43,6 +43,9 @@ public class User {
     @Column(nullable = true)
     private String email;
 
+    @Column(nullable = true)
+    private String name;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -63,10 +66,11 @@ public class User {
      * 사용자를 생성합니다.
      *
      * @param email 이메일 주소
+     * @param name 사용자 이름
      * @return 생성된 User
      */
-    public static User create(String email) {
-        return User.builder().email(email).build();
+    public static User create(String email, String name) {
+        return User.builder().email(email).name(name).build();
     }
 
     /**

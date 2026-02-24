@@ -41,4 +41,16 @@ public class AppleOAuthRequest {
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "idToken은 필수입니다")
     private String idToken;
+
+    @Schema(
+            description = "사용자 이름 (최초 회원가입 시 전달, Apple은 이름을 ID Token에 포함하지 않음)",
+            example = "홍길동",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String name;
+
+    @Schema(
+            description = "사용자 이메일 (최초 회원가입 시 전달, Apple은 최초 인증 후 이메일 미제공 가능)",
+            example = "user@example.com",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String email;
 }

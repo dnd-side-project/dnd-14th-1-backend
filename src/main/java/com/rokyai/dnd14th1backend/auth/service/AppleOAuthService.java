@@ -79,7 +79,7 @@ public class AppleOAuthService {
             isNewUser = false;
         } else {
             // 신규 사용자: User와 UserIdentity 생성
-            user = createNewUser(payload);
+            user = createNewUser(payload, request);
             createUserIdentity(user, payload, request);
             isNewUser = true;
         }
@@ -101,13 +101,16 @@ public class AppleOAuthService {
     }
 
     /**
-     * 새로운 사용자를 생성합니다.
+     * 새로운 사용자를 생성합니다. 클라이언트가 전달한 이메일/이름을 우선 사용하고, 없으면 Apple payload 값을 사용합니다.
      *
      * @param payload Apple ID Token 페이로드
+     * @param request Apple OAuth 요청 (클라이언트 전달 name/email 포함)
      * @return 생성된 User
      */
-    private User createNewUser(AppleIdTokenPayload payload) {
-        User user = User.create(payload.getEmail());
+    private User createNewUser(AppleIdTokenPayload payload, AppleOAuthRequest request) {
+        String email = request.getEmail() != null ? request.getEmail() : payload.getEmail();
+        String name = request.getName();
+        User user = User.create(email, name);
         return userRepository.save(user);
     }
 
