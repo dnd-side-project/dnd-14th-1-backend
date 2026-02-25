@@ -10,6 +10,7 @@ import com.rokyai.dnd14th1backend.auth.enums.SigninType;
 import com.rokyai.dnd14th1backend.auth.exception.InvalidIdTokenException;
 import com.rokyai.dnd14th1backend.auth.provider.AppleIdTokenVerifier;
 import com.rokyai.dnd14th1backend.auth.provider.JwtTokenProvider;
+import com.rokyai.dnd14th1backend.badge.service.DefaultBadgeService;
 import com.rokyai.dnd14th1backend.users.domain.User;
 import com.rokyai.dnd14th1backend.users.domain.UserIdentity;
 import com.rokyai.dnd14th1backend.users.infrastructure.UserIdentityRepository;
@@ -22,16 +23,19 @@ public class AppleOAuthService {
 
     private final AppleIdTokenVerifier appleIdTokenVerifier;
     private final JwtTokenProvider jwtTokenProvider;
+    private final DefaultBadgeService defaultBadgeService;
     private final UserRepository userRepository;
     private final UserIdentityRepository userIdentityRepository;
 
     public AppleOAuthService(
             AppleIdTokenVerifier appleIdTokenVerifier,
             JwtTokenProvider jwtTokenProvider,
+            DefaultBadgeService defaultBadgeService,
             UserRepository userRepository,
             UserIdentityRepository userIdentityRepository) {
         this.appleIdTokenVerifier = appleIdTokenVerifier;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.defaultBadgeService = defaultBadgeService;
         this.userRepository = userRepository;
         this.userIdentityRepository = userIdentityRepository;
     }
@@ -83,6 +87,8 @@ public class AppleOAuthService {
             createUserIdentity(user, payload, request);
             isNewUser = true;
         }
+
+        defaultBadgeService.ensureDefaultBadge(user);
 
         String userId = user.getId().toString();
 

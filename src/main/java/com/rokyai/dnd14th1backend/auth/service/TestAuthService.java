@@ -11,6 +11,7 @@ import com.rokyai.dnd14th1backend.auth.dto.CreateTestUserRequest;
 import com.rokyai.dnd14th1backend.auth.enums.Platform;
 import com.rokyai.dnd14th1backend.auth.enums.SigninType;
 import com.rokyai.dnd14th1backend.auth.provider.JwtTokenProvider;
+import com.rokyai.dnd14th1backend.badge.service.DefaultBadgeService;
 import com.rokyai.dnd14th1backend.users.domain.User;
 import com.rokyai.dnd14th1backend.users.domain.UserIdentity;
 import com.rokyai.dnd14th1backend.users.infrastructure.UserIdentityRepository;
@@ -25,14 +26,17 @@ public class TestAuthService {
     private final UserRepository userRepository;
     private final UserIdentityRepository userIdentityRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final DefaultBadgeService defaultBadgeService;
 
     public TestAuthService(
             UserRepository userRepository,
             UserIdentityRepository userIdentityRepository,
-            JwtTokenProvider jwtTokenProvider) {
+            JwtTokenProvider jwtTokenProvider,
+            DefaultBadgeService defaultBadgeService) {
         this.userRepository = userRepository;
         this.userIdentityRepository = userIdentityRepository;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.defaultBadgeService = defaultBadgeService;
     }
 
     /**
@@ -49,6 +53,7 @@ public class TestAuthService {
 
         User user = User.create(email, null);
         user = userRepository.save(user);
+        defaultBadgeService.ensureDefaultBadge(user);
 
         UserIdentity identity =
                 UserIdentity.create(
