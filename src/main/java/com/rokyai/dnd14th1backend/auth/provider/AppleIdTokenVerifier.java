@@ -1,9 +1,11 @@
 package com.rokyai.dnd14th1backend.auth.provider;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.rokyai.dnd14th1backend.auth.dto.AppleIdTokenPayload;
@@ -67,7 +69,78 @@ public class AppleIdTokenVerifier {
      */
     private AppleIdTokenPayload extractPayload(String idToken) throws Exception {
         String[] parts = idToken.split("\\.");
-        String decodedPayload = new String(Base64.getUrlDecoder().decode(parts[1]));
-        return objectMapper.readValue(decodedPayload, AppleIdTokenPayload.class);
+        String decodedPayload =
+                new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+        JsonNode payloadNode = objectMapper.readTree(decodedPayload);
+
+        return AppleIdTokenPayload.builder()
+                .subject(readText(payloadNode, "sub"))
+                .email(readText(payloadNode, "email"))
+                .emailVerified(readBoolean(payloadNode, "email_verified"))
+                .audience(readAudience(payloadNode.get("aud")))
+                .issuer(readText(payloadNode, "iss"))
+                .issuedAt(readLong(payloadNode, "iat"))
+                .expiresAt(readLong(payloadNode, "exp"))
+                .codeHash(readText(payloadNode, "c_hash"))
+                .authTime(readLong(payloadNode, "auth_time"))
+                .nonceSupported(readBoolean(payloadNode, "nonce_supported"))
+                .build();
+    }
+
+    private String readText(JsonNode node, String fieldName) {
+        JsonNode value = node.get(fieldName);
+        return value == null || value.isNull() ? null : value.asText();
+    }
+
+    private Long readLong(JsonNode node, String fieldName) {
+        JsonNode value = node.get(fieldName);
+        if (value == null || value.isNull()) {
+            return null;
+        }
+        if (value.isNumber()) {
+            return value.longValue();
+        }
+        if (value.isTextual()) {
+            try {
+                return Long.parseLong(value.asText());
+            } catch (NumberFormatException exception) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private Boolean readBoolean(JsonNode node, String fieldName) {
+        JsonNode value = node.get(fieldName);
+        if (value == null || value.isNull()) {
+            return null;
+        }
+        if (value.isBoolean()) {
+            return value.booleanValue();
+        }
+        if (value.isTextual()) {
+            String text = value.asText();
+            if ("true".equalsIgnoreCase(text)) {
+                return true;
+            }
+            if ("false".equalsIgnoreCase(text)) {
+                return false;
+            }
+        }
+        return null;
+    }
+
+    private String readAudience(JsonNode audienceNode) {
+        if (audienceNode == null || audienceNode.isNull()) {
+            return null;
+        }
+        if (audienceNode.isTextual()) {
+            return audienceNode.asText();
+        }
+        if (audienceNode.isArray() && !audienceNode.isEmpty()) {
+            JsonNode first = audienceNode.get(0);
+            return first == null || first.isNull() ? null : first.asText();
+        }
+        return null;
     }
 }
