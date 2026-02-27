@@ -2,6 +2,7 @@ package com.rokyai.dnd14th1backend.users.mapper;
 
 import com.rokyai.dnd14th1backend.badge.entity.Badge;
 import com.rokyai.dnd14th1backend.badge.entity.UserBadge;
+import com.rokyai.dnd14th1backend.badge.util.BadgeImageUrlResolver;
 import com.rokyai.dnd14th1backend.users.domain.User;
 import com.rokyai.dnd14th1backend.users.dto.RepresentativeBadgeResponse;
 import com.rokyai.dnd14th1backend.users.dto.UserMeResponse;
@@ -28,8 +29,8 @@ public final class UserMapper {
                             badge.getId(),
                             badge.getName(),
                             badge.getTier(),
-                            badge.getEnableImageUrl(),
-                            badge.getDisableImageUrl());
+                            BadgeImageUrlResolver.toPublicUrl(badge.getEnableImageUrl()),
+                            BadgeImageUrlResolver.toPublicUrl(badge.getDisableImageUrl()));
         }
 
         return new UserMeResponse(

@@ -7,6 +7,7 @@ import com.rokyai.dnd14th1backend.badge.dto.EarnedBadgeInfo;
 import com.rokyai.dnd14th1backend.badge.dto.UserBadgeResponse;
 import com.rokyai.dnd14th1backend.badge.entity.Badge;
 import com.rokyai.dnd14th1backend.badge.entity.UserBadge;
+import com.rokyai.dnd14th1backend.badge.util.BadgeImageUrlResolver;
 
 /** Badge Entity-DTO 변환 매퍼. */
 public final class BadgeMapper {
@@ -22,8 +23,8 @@ public final class BadgeMapper {
                 badge.getTier(),
                 badge.getTriggerType(),
                 badge.getTriggerCondition(),
-                badge.getEnableImageUrl(),
-                badge.getDisableImageUrl());
+                BadgeImageUrlResolver.toPublicUrl(badge.getEnableImageUrl()),
+                BadgeImageUrlResolver.toPublicUrl(badge.getDisableImageUrl()));
     }
 
     /**
@@ -42,8 +43,8 @@ public final class BadgeMapper {
                 badge.getTier(),
                 badge.getTriggerType(),
                 badge.getTriggerCondition(),
-                badge.getEnableImageUrl(),
-                badge.getDisableImageUrl(),
+                BadgeImageUrlResolver.toPublicUrl(badge.getEnableImageUrl()),
+                BadgeImageUrlResolver.toPublicUrl(badge.getDisableImageUrl()),
                 userBadge.getEarnedAt(),
                 userBadge.getId().equals(representativeUserBadgeId));
     }
@@ -55,8 +56,8 @@ public final class BadgeMapper {
                 badge.getId(),
                 badge.getName(),
                 badge.getTier(),
-                badge.getEnableImageUrl(),
-                badge.getDisableImageUrl(),
+                BadgeImageUrlResolver.toPublicUrl(badge.getEnableImageUrl()),
+                BadgeImageUrlResolver.toPublicUrl(badge.getDisableImageUrl()),
                 userBadge.getEarnedAt());
     }
 }
