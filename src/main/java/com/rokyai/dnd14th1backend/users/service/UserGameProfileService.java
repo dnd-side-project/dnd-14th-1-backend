@@ -20,6 +20,7 @@ import com.rokyai.dnd14th1backend.badge.entity.Badge;
 import com.rokyai.dnd14th1backend.badge.repository.BadgeRepository;
 import com.rokyai.dnd14th1backend.badge.repository.UserBadgeRepository;
 import com.rokyai.dnd14th1backend.badge.service.BadgeEventService;
+import com.rokyai.dnd14th1backend.badge.util.BadgeImageUrlResolver;
 import com.rokyai.dnd14th1backend.crawling.domain.Chat;
 import com.rokyai.dnd14th1backend.crawling.exception.CrawlingErrorStatus;
 import com.rokyai.dnd14th1backend.crawling.exception.CrawlingException;
@@ -177,11 +178,17 @@ public class UserGameProfileService {
                             currentValue,
                             currentBadge != null ? currentBadge.getTier() : null,
                             currentBadge != null ? currentBadge.getDescription() : null,
-                            currentBadge != null ? currentBadge.getEnableImageUrl() : null,
+                            currentBadge != null
+                                    ? BadgeImageUrlResolver.toPublicUrl(
+                                            currentBadge.getEnableImageUrl())
+                                    : null,
                             nextBadge != null ? nextBadge.getTriggerCondition() : null,
                             nextBadge != null ? nextBadge.getTier() : null,
                             nextBadge != null ? nextBadge.getDescription() : null,
-                            nextBadge != null ? nextBadge.getEnableImageUrl() : null));
+                            nextBadge != null
+                                    ? BadgeImageUrlResolver.toPublicUrl(
+                                            nextBadge.getEnableImageUrl())
+                                    : null));
         }
 
         return progressList;
