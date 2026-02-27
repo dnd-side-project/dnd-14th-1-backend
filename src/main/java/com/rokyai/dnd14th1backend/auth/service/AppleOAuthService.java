@@ -12,7 +12,9 @@ import com.rokyai.dnd14th1backend.auth.provider.AppleIdTokenVerifier;
 import com.rokyai.dnd14th1backend.auth.provider.JwtTokenProvider;
 import com.rokyai.dnd14th1backend.badge.service.DefaultBadgeService;
 import com.rokyai.dnd14th1backend.users.domain.User;
+import com.rokyai.dnd14th1backend.users.domain.UserGameProfile;
 import com.rokyai.dnd14th1backend.users.domain.UserIdentity;
+import com.rokyai.dnd14th1backend.users.infrastructure.UserGameProfileRepository;
 import com.rokyai.dnd14th1backend.users.infrastructure.UserIdentityRepository;
 import com.rokyai.dnd14th1backend.users.infrastructure.UserRepository;
 
@@ -26,18 +28,21 @@ public class AppleOAuthService {
     private final DefaultBadgeService defaultBadgeService;
     private final UserRepository userRepository;
     private final UserIdentityRepository userIdentityRepository;
+    private final UserGameProfileRepository userGameProfileRepository;
 
     public AppleOAuthService(
             AppleIdTokenVerifier appleIdTokenVerifier,
             JwtTokenProvider jwtTokenProvider,
             DefaultBadgeService defaultBadgeService,
             UserRepository userRepository,
-            UserIdentityRepository userIdentityRepository) {
+            UserIdentityRepository userIdentityRepository,
+            UserGameProfileRepository userGameProfileRepository) {
         this.appleIdTokenVerifier = appleIdTokenVerifier;
         this.jwtTokenProvider = jwtTokenProvider;
         this.defaultBadgeService = defaultBadgeService;
         this.userRepository = userRepository;
         this.userIdentityRepository = userIdentityRepository;
+        this.userGameProfileRepository = userGameProfileRepository;
     }
 
     public AuthResponse authenticateWithApple(AppleOAuthRequest request) {
@@ -82,9 +87,10 @@ public class AppleOAuthService {
             userIdentityRepository.save(existingIdentity);
             isNewUser = false;
         } else {
-            // 신규 사용자: User와 UserIdentity 생성
+            // 신규 사용자: User, UserIdentity, UserGameProfile 생성
             user = createNewUser(payload, request);
             createUserIdentity(user, payload, request);
+            userGameProfileRepository.save(UserGameProfile.create(user.getId()));
             isNewUser = true;
         }
 
