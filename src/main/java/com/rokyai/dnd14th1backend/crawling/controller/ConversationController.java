@@ -43,7 +43,8 @@ public class ConversationController {
     private final UserGameProfileService userGameProfileService;
 
     public ConversationController(
-            ConversationService conversationService, UserGameProfileService userGameProfileService) {
+            ConversationService conversationService,
+            UserGameProfileService userGameProfileService) {
         this.conversationService = conversationService;
         this.userGameProfileService = userGameProfileService;
     }
@@ -290,7 +291,8 @@ public class ConversationController {
             @Valid @RequestBody OptimizeChatRequest request,
             @AuthenticationPrincipal UUID userId) {
         OptimizeChatResponse response =
-                userGameProfileService.optimizeChat(userId, conversationId, chatId, request.tokenSaving());
+                userGameProfileService.optimizeChat(
+                        userId, conversationId, chatId, request.tokenSaving());
         return ResponseEntity.ok(response);
     }
 }
