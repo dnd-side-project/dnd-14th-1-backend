@@ -25,7 +25,7 @@ class BadgeImageUrlResolverTest {
 
         String result = BadgeImageUrlResolver.toPublicUrl("/badge/enable/enable_gadian.png");
 
-        assertEquals("http://localhost:8080/badge/enable/enable_gadian.png", result);
+        assertEquals("https://localhost:8080/badge/enable/enable_gadian.png", result);
     }
 
     @Test
@@ -35,6 +35,15 @@ class BadgeImageUrlResolverTest {
         String result = BadgeImageUrlResolver.toPublicUrl(imageUrl);
 
         assertEquals(imageUrl, result);
+    }
+
+    @Test
+    void toPublicUrl_absoluteHttpUrl_returnsHttpsUrl() {
+        String imageUrl = "http://cdn.example.com/badge/enable.png";
+
+        String result = BadgeImageUrlResolver.toPublicUrl(imageUrl);
+
+        assertEquals("https://cdn.example.com/badge/enable.png", result);
     }
 
     @Test
