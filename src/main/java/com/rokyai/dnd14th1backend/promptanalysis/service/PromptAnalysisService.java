@@ -21,7 +21,7 @@ import com.rokyai.dnd14th1backend.promptanalysis.infrastructure.PromptAnalysisRe
 import com.rokyai.dnd14th1backend.promptanalysis.mapper.PromptAnalysisMapper;
 import com.rokyai.dnd14th1backend.users.domain.UserGameProfile;
 import com.rokyai.dnd14th1backend.users.infrastructure.UserGameProfileRepository;
-import com.rokyai.dnd14th1backend.users.service.UserGameService;
+import com.rokyai.dnd14th1backend.users.service.UserGameProfileService;
 
 /** 프롬프트 분석 결과 서비스 */
 @Slf4j
@@ -34,19 +34,19 @@ public class PromptAnalysisService {
     private final UserGameProfileRepository userGameProfileRepository;
     private final ChatRepository chatRepository;
     private final BadgeEventService badgeEventService;
-    private final UserGameService userGameService;
+    private final UserGameProfileService userGameProfileService;
 
     public PromptAnalysisService(
             PromptAnalysisResultRepository promptAnalysisResultRepository,
             UserGameProfileRepository userGameProfileRepository,
             ChatRepository chatRepository,
             BadgeEventService badgeEventService,
-            UserGameService userGameService) {
+            UserGameProfileService userGameProfileService) {
         this.promptAnalysisResultRepository = promptAnalysisResultRepository;
         this.userGameProfileRepository = userGameProfileRepository;
         this.chatRepository = chatRepository;
         this.badgeEventService = badgeEventService;
-        this.userGameService = userGameService;
+        this.userGameProfileService = userGameProfileService;
     }
 
     /**
@@ -94,8 +94,8 @@ public class PromptAnalysisService {
             }
         }
 
-        int tier = userGameService.calculateTier(profile.getTotalXp());
-        double progress = userGameService.calculateProgress(profile.getTotalXp(), tier);
+        int tier = userGameProfileService.calculateTier(profile.getTotalXp());
+        double progress = userGameProfileService.calculateProgress(profile.getTotalXp(), tier);
 
         return PromptAnalysisMapper.toResponse(
                 result, profile.getTotalXp(), tier, progress, earnedBadges);

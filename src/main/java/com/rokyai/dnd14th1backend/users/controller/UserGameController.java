@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.rokyai.dnd14th1backend.users.dto.UserGameProfileResponse;
-import com.rokyai.dnd14th1backend.users.service.UserGameService;
+import com.rokyai.dnd14th1backend.users.service.UserGameProfileService;
 
 /** 사용자 게임 프로필 컨트롤러 */
 @RestController
@@ -24,10 +24,10 @@ import com.rokyai.dnd14th1backend.users.service.UserGameService;
 @Tag(name = "사용자", description = "사용자 게임 프로필 API")
 public class UserGameController {
 
-    private final UserGameService userGameService;
+    private final UserGameProfileService userGameProfileService;
 
-    public UserGameController(UserGameService userGameService) {
-        this.userGameService = userGameService;
+    public UserGameController(UserGameProfileService userGameProfileService) {
+        this.userGameProfileService = userGameProfileService;
     }
 
     @GetMapping("/profile")
@@ -48,7 +48,7 @@ public class UserGameController {
             })
     public ResponseEntity<UserGameProfileResponse> getProfile(
             @AuthenticationPrincipal UUID userId) {
-        UserGameProfileResponse response = userGameService.getProfile(userId);
+        UserGameProfileResponse response = userGameProfileService.getProfile(userId);
         return ResponseEntity.ok(response);
     }
 }

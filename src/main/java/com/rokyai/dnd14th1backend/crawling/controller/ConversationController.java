@@ -31,7 +31,7 @@ import com.rokyai.dnd14th1backend.crawling.dto.CreateConversationRequest;
 import com.rokyai.dnd14th1backend.crawling.service.ConversationService;
 import com.rokyai.dnd14th1backend.users.dto.OptimizeChatRequest;
 import com.rokyai.dnd14th1backend.users.dto.OptimizeChatResponse;
-import com.rokyai.dnd14th1backend.users.service.UserGameService;
+import com.rokyai.dnd14th1backend.users.service.UserGameProfileService;
 
 /** Conversation, Chat 컨트롤러 */
 @RestController
@@ -40,12 +40,12 @@ import com.rokyai.dnd14th1backend.users.service.UserGameService;
 public class ConversationController {
 
     private final ConversationService conversationService;
-    private final UserGameService userGameService;
+    private final UserGameProfileService userGameProfileService;
 
     public ConversationController(
-            ConversationService conversationService, UserGameService userGameService) {
+            ConversationService conversationService, UserGameProfileService userGameProfileService) {
         this.conversationService = conversationService;
-        this.userGameService = userGameService;
+        this.userGameProfileService = userGameProfileService;
     }
 
     /**
@@ -290,7 +290,7 @@ public class ConversationController {
             @Valid @RequestBody OptimizeChatRequest request,
             @AuthenticationPrincipal UUID userId) {
         OptimizeChatResponse response =
-                userGameService.optimizeChat(userId, conversationId, chatId, request.tokenSaving());
+                userGameProfileService.optimizeChat(userId, conversationId, chatId, request.tokenSaving());
         return ResponseEntity.ok(response);
     }
 }

@@ -54,4 +54,14 @@ public interface ChatRepository extends JpaRepository<Chat, UUID> {
     @Query(
             "SELECT COUNT(c) FROM Chat c WHERE c.conversation.userId = :userId AND c.xpEarned IS NOT NULL")
     long countOptimizedByUserId(@Param("userId") UUID userId);
+
+    /**
+     * 유저의 최대 단회 토큰 절약량 조회.
+     *
+     * @param userId 사용자 ID
+     * @return 최대 토큰 절약량 (없으면 0)
+     */
+    @Query(
+            "SELECT COALESCE(MAX(c.tokenSaving), 0) FROM Chat c WHERE c.conversation.userId = :userId")
+    int findMaxTokenSavingByUserId(@Param("userId") UUID userId);
 }

@@ -61,10 +61,7 @@ public class DefaultBadgeService {
             }
         } catch (DataIntegrityViolationException exception) {
             // 동시 요청으로 중복 지급 시 unique 제약 조건에서 방지
-            log.debug(
-                    "기본 뱃지가 이미 지급되었습니다. userId={}, badgeId={}",
-                    userId,
-                    DEFAULT_BADGE_ID);
+            log.debug("기본 뱃지가 이미 지급되었습니다. userId={}, badgeId={}", userId, DEFAULT_BADGE_ID);
         }
     }
 }
