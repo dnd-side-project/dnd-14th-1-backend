@@ -116,13 +116,15 @@ public class UserGameProfileService {
                 xpEarned, profile.getTotalXp(), tier, progress, earnedBadges);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public UserGameProfileResponse getProfile(UUID userId) {
         UserGameProfile profile =
                 userGameProfileRepository
                         .findByUserId(userId)
-                        .orElseThrow(
-                                () -> new UserGameException(UserGameErrorStatus.PROFILE_NOT_FOUND));
+                        .orElseGet(
+                                () ->
+                                        userGameProfileRepository.save(
+                                                UserGameProfile.create(userId)));
 
         int tier = calculateTier(profile.getTotalXp());
         long currentTierXp = requiredXp(tier);
